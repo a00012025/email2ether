@@ -7,8 +7,8 @@
 import { program } from "commander";
 import fs from "fs";
 import { promisify } from "util";
-import { verifyDKIMSignature } from "@zk-email/helpers/dist/dkim";
-import { generateCircuitInputs } from "@zk-email/helpers/dist/input-helpers";
+import { verifyDKIMSignature } from "@zk-email/helpers/dkim";
+import { generateCircuitInputs } from "@zk-email/helpers/input-helpers";
 import path from "path";
 const snarkjs = require("snarkjs");
 
