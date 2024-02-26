@@ -7,3 +7,6 @@
 [submodule "contracts/lib/account-abstraction"]
 	path = contracts/lib/account-abstraction
 	url = https://github.com/eth-infinitism/account-abstraction
+[submodule "contracts/lib/poseidon-solidity"]
+	path = contracts/lib/poseidon-solidity
+	url = https://github.com/vimwitch/poseidon-solidity
