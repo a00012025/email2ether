@@ -2,7 +2,7 @@
   "parts": [
     {
       "is_public": false,
-      "regex_def": "Please change my wallet owner address to =\r\n"
+      "regex_def": "Change owner to "
     },
     {
       "is_public": true,

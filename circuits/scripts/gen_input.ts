@@ -9,22 +9,16 @@ import fs from "fs";
 import { promisify } from "util";
 import { verifyDKIMSignature } from "@/helpers/dkim";
 import { generateCircuitInputs } from "@/helpers/input-helpers";
-import path from "path";
-const snarkjs = require("snarkjs");
+// const snarkjs = require("snarkjs");
 
 type ChangeOwnerCircuitInput = {
   in_padded: string[];
   pubkey: string[];
   signature: string[];
   in_len_padded_bytes: string;
-  precomputed_sha?: string[];
-  in_body_padded?: string[];
-  in_body_len_padded_bytes?: string;
-  body_hash_idx?: string;
-  wallet_address_idx?: string;
+  sender_email_idx: string;
 };
 
-const STRING_PRESELECTOR = "Please change my wallet owner address to =\r\n";
 const MAX_HEADER_PADDED_BYTES = 1024;
 const MAX_BODY_PADDED_BYTES = 192;
 
@@ -61,30 +55,37 @@ async function generate() {
     body: dkimResult.body, // body of the email
     bodyHash: dkimResult.bodyHash, // hash of the email body
     message: dkimResult.message, // the message that was signed (header + bodyHash)
-    //Optional to verify regex in the body of email
-    shaPrecomputeSelector: STRING_PRESELECTOR, // String to split the body for SHA pre computation
     maxMessageLength: MAX_HEADER_PADDED_BYTES, // Maximum allowed length of the message in circuit
     maxBodyLength: MAX_BODY_PADDED_BYTES, // Maximum allowed length of the body in circuit
     ignoreBodyHashCheck: false, // To be used when ignore_body_hash_check is true in circuit
   });
 
-  const bodyRemaining = emailVerifierInputs.in_body_padded!.map((c) =>
-    Number(c)
-  ); // Char array to Uint8Array
-  const selectorBuffer = Buffer.from(STRING_PRESELECTOR);
-  const walletAddressIndex =
-    Buffer.from(bodyRemaining).indexOf(selectorBuffer) + selectorBuffer.length;
+  const in_padded_buf = emailVerifierInputs.in_padded.map((c) => Number(c));
+  const in_padded_str = in_padded_buf
+    .map((c) => String.fromCharCode(c))
+    .join("");
 
+  // get sender email index
+  const re =
+    /(?:(?:\r\n)|^)from:(?:[^\r\n]+<)?([A-Za-z0-9!#$%&'\\*\\+-/=\\?^_`{\\|}~\\.]+@[A-Za-z0-9\\.-]+)/gm;
+  const match = Array.from(in_padded_str.matchAll(re))[0];
+  const sender_email = match[1];
+  const sender_email_idx =
+    match.index! + in_padded_str.substring(match.index!).indexOf(sender_email);
+
+  // not using body hash here
   const circuitInputs: ChangeOwnerCircuitInput = {
-    ...emailVerifierInputs,
-    wallet_address_idx: walletAddressIndex.toString(),
+    in_padded: emailVerifierInputs.in_padded,
+    pubkey: emailVerifierInputs.pubkey,
+    signature: emailVerifierInputs.signature,
+    in_len_padded_bytes: emailVerifierInputs.in_len_padded_bytes,
+    sender_email_idx: sender_email_idx.toString(),
   };
-  log("\n\nGenerated Inputs:", circuitInputs, "\n\n");
+
   await promisify(fs.writeFile)(
     args.inputFile,
     JSON.stringify(circuitInputs, null, 2)
   );
-
   log("Inputs written to", args.inputFile);
 
   // if (args.prove) {

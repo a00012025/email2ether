@@ -1,86 +1,85 @@
 Delivered-To: email2ether.denver@gmail.com
-Received: by 2002:abe:f646:0:b0:394:7d99:5434 with SMTP id u67csp1308683vlh;
-        Mon, 26 Feb 2024 09:58:54 -0800 (PST)
-X-Received: by 2002:a05:6602:2c86:b0:7c7:91b7:201f with SMTP id i6-20020a0566022c8600b007c791b7201fmr11739127iow.11.1708970334516;
-        Mon, 26 Feb 2024 09:58:54 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1708970334; cv=none;
+Received: by 2002:abe:f646:0:b0:394:7d99:5434 with SMTP id u67csp1412089vlh;
+        Mon, 26 Feb 2024 13:52:46 -0800 (PST)
+X-Received: by 2002:a92:cace:0:b0:365:316b:23d3 with SMTP id m14-20020a92cace000000b00365316b23d3mr8393497ilq.19.1708984365958;
+        Mon, 26 Feb 2024 13:52:45 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1708984365; cv=none;
         d=google.com; s=arc-20160816;
-        b=BduqcUE/p32Yv/0GvfrXAFC/cXDH7bvguxnurw0Uya4jEwO3x3/UJht+8sSoU+ZM3b
-         hcmfv5ke8ZJ4Mh8PzYRKOU1bLR67S2bNYOhh1M207QG0jFNoZaC0m4yX/+wlJEabCAox
-         JtWlZwc5KQMpSXMWM1Spv4s5GjDPVAlU/K2Ke69gblZT1u9FAALB4ITgIais8uoihG8Z
-         Xz6Ydv4B8ky3+lWROm7dFX8B+UBd0oByCzP7uLRTk6sDuvAwmNL0DZsr1hslJ86jNz86
-         Ew3d4AVh0G7IYpBeUANSZibcIsTWW/4asCpXPo6fEjJKHQMbZP3qG+QYPV0QpFUyCLob
-         2IgQ==
+        b=kfHDEj1T4ge8bjAuVU5bZpkPyyUB6HLG2JmZvVLl8oFBztVXhy069+DbjFqVgt1llG
+         xBYqTtj4W6DmJ8opANdCw4h3oxXpvAZSZPanI0sMgbxbiN1IYMk79tau1fNI4JP+G2Fo
+         TFreirYL2rfyNnzOqYtyLP4wJpqR1JG4a3v/x0NHsDH+pmya6QDcwsVoSjNLdA1A7yO3
+         6NKz/Og/I9c6uNeqDyxWz/YrWmVMNjJK3Fnmr7Bxo1TDPeJbGs35g5g1u12J/4GEczlQ
+         o0DbSStT+SbOB5EaX4sGeYK54qQqEcFL+PuALVh55jEZWrvI2i3OVimGRT6GKgxRpuUo
+         Fb6Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
         h=to:date:message-id:subject:mime-version:content-transfer-encoding
          :from:dkim-signature;
-        bh=YRaSokqswZVKhqS5rSeguYa+QxTBblxIgl+NoPDT0Jg=;
+        bh=pXfL1O+m97cb/n22ZBH+OvFUD3FS6PKxhlcBCz6vCGQ=;
         fh=lJ8TxFIO9UG6DJDyHpzBWQb+MEglSIjSejmkTBY9jEo=;
-        b=xhgi0FBlDnMPDNKMnDQe8+c2e4E8878zhUQcATzx+aqnUCVzZFPJx883n2BCGhy7R2
-         ifK+Lb/o6y99z3pdhWfaNwkrEUBVEwlydqH+4rzlKOqHIbq5TmLspdraE3OAvGDUVnZi
-         dJco7QAo0nH+vaK1FAL97cYVvA5yuOZMtj7jPjWfITGSYpqE6jG6SDfpxYvm0bT0UEP0
-         smj7CezPA286n8NxV/JLVVZ2lpoHmEDRGfWTbcnYKFuFx8JEXBv6WkKXiyV92eFOvAMe
-         qppvedcj1SmZtbsx65e+Y38Uqo6ZSgJvsjuqtwxeDNj9mnjQEMykmvQ0SwnX57879gw8
-         W8CA==;
+        b=KPnNs3TIIzg89/tnMZNcNZ/L+Nckai4uWWh5EwVVL5UQa+AJZNyzxxtPXbi8uNuauT
+         jpQ6DBPC9cnUFk5MkBhS1a14CFhrX1IZasy05GjN3QrN5GkLI0tNi7EIdURXeUFcHPG0
+         QfI0k6Rph6pyFu1JcluEmVA8Fnq3T3MF9PK+7SNc+vhDazg5+8s6JKNWkxCghGIMZUto
+         YwXQts22vbt6fK1qwDfLKaxxnaoeQnJGv4fCQJgL4CT38MwGGDftcomsBnaKhvtPwRqS
+         RsO2QZ1Ha+KR3wPgKif44r9S1rvPWpwT4z1XgScl5qAJtZ7EtjWNpGT8UF2N3R+zPcP5
+         JxCw==;
         dara=google.com
 ARC-Authentication-Results: i=1; mx.google.com;
-       dkim=pass header.i=@gmail.com header.s=20230601 header.b=Q+Rxko4K;
-       spf=pass (google.com: domain of kuanthedev@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=kuanthedev@gmail.com;
+       dkim=pass header.i=@gmail.com header.s=20230601 header.b=TvCyYfJt;
+       spf=pass (google.com: domain of a00012025@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=a00012025@gmail.com;
        dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
-Return-Path: <kuanthedev@gmail.com>
+Return-Path: <a00012025@gmail.com>
 Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
-        by mx.google.com with SMTPS id l9-20020a6b3e09000000b007c7a420e33dsor1371208ioa.0.2024.02.26.09.58.54
+        by mx.google.com with SMTPS id bp26-20020a056e02349a00b003637e27dd96sor1926214ilb.14.2024.02.26.13.52.45
         for <email2ether.denver@gmail.com>
         (Google Transport Security);
-        Mon, 26 Feb 2024 09:58:54 -0800 (PST)
-Received-SPF: pass (google.com: domain of kuanthedev@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+        Mon, 26 Feb 2024 13:52:45 -0800 (PST)
+Received-SPF: pass (google.com: domain of a00012025@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
 Authentication-Results: mx.google.com;
-       dkim=pass header.i=@gmail.com header.s=20230601 header.b=Q+Rxko4K;
-       spf=pass (google.com: domain of kuanthedev@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=kuanthedev@gmail.com;
+       dkim=pass header.i=@gmail.com header.s=20230601 header.b=TvCyYfJt;
+       spf=pass (google.com: domain of a00012025@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=a00012025@gmail.com;
        dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1708970333; x=1709575133; dara=google.com;
+        d=gmail.com; s=20230601; t=1708984365; x=1709589165; dara=google.com;
         h=to:date:message-id:subject:mime-version:content-transfer-encoding
          :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=YRaSokqswZVKhqS5rSeguYa+QxTBblxIgl+NoPDT0Jg=;
-        b=Q+Rxko4KodxyCpy7w2B9qEu6NjnkSGm+B8/iPjpR/jTHMeWogg35n3XkdmZxa0ZRMi
-         7+sPY4WOmCASsUtJ0LXmvVGvb8TUwko60tSvzIE9VY8gHunyR95TNBqrMFPKopyqrMyQ
-         6oIi9RqrZarZArq4gJqvP6vXYJ+XA60NXIhDXzSKVChinzpj2bn9H14nPnxCeifh7Gp4
-         rddA7iUHxiI2Pif1/JcpUSWEunTeD6IaJGL1nyWmbD35UsRGIr1vMlynV/8GalBibpcD
-         OZ9pjMIDOinEb4E0awE0VTZ1t8cLpTs+RoFys69rK08QpDMWgjCShn5Re44J5h2HBvOK
-         yxkA==
+        bh=pXfL1O+m97cb/n22ZBH+OvFUD3FS6PKxhlcBCz6vCGQ=;
+        b=TvCyYfJtwmAu1MXzxAO4TCGI0CDlOXQiOqvIOTa5z1fk65eSfjSdeqaW8MNJOL+mtc
+         DrleyN86//yVYjIkx7HzBO23hWhHpPXemjC7Ln2JQjk/ry4mT8pSqlQxZc8F9M88nXTB
+         CzHFB9x8sdsMYLaOxHK0reb08MW7OgqZnLAAzcaF0331XrBjOdVNMtB57KRbY/jVgxrE
+         Udto9MAQw6MLyMJwj4zGYFf863EJtJAHSKeXFB5HQwzyGEfbZ4AOBfpOS1rc7XAQYmc+
+         RIM3OznjQW2wI3izp5q9LZYioF31UJ8QZiR5G//HZhrW2XOzTH//PZGfWIW1opHG/Nnd
+         ZREQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708970333; x=1709575133;
+        d=1e100.net; s=20230601; t=1708984365; x=1709589165;
         h=to:date:message-id:subject:mime-version:content-transfer-encoding
          :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=YRaSokqswZVKhqS5rSeguYa+QxTBblxIgl+NoPDT0Jg=;
-        b=OSIP6zMZaUp5wFQHYADWDnzKVb7r5dl/rYnKxmFpYeeA46Dfgtg9O00bc2oUMFMPdo
-         hiKUVirkv00uCUkTM9PK1ZkaEye5YF0uA9mEsq3W8h95qL6qIIJ6/OQRxtEAKap4tlnx
-         nERI2uUWprcPK3OI5OPuh5NScnBB9AQvIljHKtR0w5gDPAcrq6I61ERCD7q3PTh/TjXu
-         /Up3Xg1gz3CFCpQQ9WhQala6VdnpXVZmEJU/6MzVNSLri9E9zx3083WGJ/6K86lrxqx/
-         YTE0PXqXO9Lp+xbQx+rkyvzcBuR6ofiInoyZUNzRJTZP91kgxfZs4quF8C6mWtPR956g
-         2yuQ==
-X-Gm-Message-State: AOJu0YxAfETYCQSrBqAnesubhD8X5rfANMUwM0OpluLh1FOLNbgPgLk8
-        ilveuCQC3I7C9PZYpzwHXRMtunc3ffzrO6cGgqYb14oekt5Wv1+ROWE+x85Dqg==
-X-Google-Smtp-Source: AGHT+IErgz8tWO/84/rlJMAedvmbzgOx1awctegFJkJtNaBsqCNeS+IQcUHeLUuAfhyI5j+GEveK8g==
-X-Received: by 2002:a5e:a713:0:b0:7c0:3736:c0de with SMTP id b19-20020a5ea713000000b007c03736c0demr9318549iod.10.1708970333252;
-        Mon, 26 Feb 2024 09:58:53 -0800 (PST)
-Return-Path: <kuanthedev@gmail.com>
-Received: from smtpclient.apple (63-149-110-251.dia.static.qwest.net. [63.149.110.251])
-        by smtp.gmail.com with ESMTPSA id w20-20020a5ed614000000b007c7b23fab3asm1181464iom.28.2024.02.26.09.58.52
+        bh=pXfL1O+m97cb/n22ZBH+OvFUD3FS6PKxhlcBCz6vCGQ=;
+        b=HWphXOZ2MkgjKjPJvu9NKLtl1HKGr3nH4qb1WJ1Z8rwmql1TvmBLu/qNkZ6xdUyFIW
+         23CWQKDLojxkVK+gxZuT+FvyK35+MSS/GglQ0Kz/iTFPSnMtw1VFtC/Iol2vcqFsSHD0
+         jwzmT3zZZs/Uhkc03cvEXOHCNKp0GI6Zr9fcCG4EcwaAHiw61i3PTMcceuP/61gX168i
+         cZnREwK5JeDXzUk/BcyP2q78xwD6ZZ4pq9EoiKeOtZtc+xOVgaTP8U7vR6ZWx3qa7LX4
+         v6b0ZFxEFa4EcVj+E6ygCoZp6xvScicH4+Riwy3dXiKLlSbNy9yygyrONEZs++L0d2L3
+         rZRQ==
+X-Gm-Message-State: AOJu0YyondJRXHQ27omP6pXHXbpdnE/SM7PNcSf7A5u2JglrdgjyDxXk
+        zgiJOSqr0Jz0DyfvjTomosfDaf7I/w5Km/p4LuQV0r1ZqGPWl/JxPynpWiZQKzppAg==
+X-Google-Smtp-Source: AGHT+IEMKBh1CVxU+P8Wq7EJYh2E62Cw7sxRsnpMgFCOp3Q5Y4Vb6VvYmGtEoL/tunF+Vyp9MYGDfg==
+X-Received: by 2002:a92:d24d:0:b0:365:3409:8748 with SMTP id v13-20020a92d24d000000b0036534098748mr10434896ilg.25.1708984365216;
+        Mon, 26 Feb 2024 13:52:45 -0800 (PST)
+Return-Path: <a00012025@gmail.com>
+Received: from smtpclient.apple (63-149-110-249.dia.static.qwest.net. [63.149.110.249])
+        by smtp.gmail.com with ESMTPSA id w13-20020a92d2cd000000b00363f1de3813sm1671971ilg.53.2024.02.26.13.52.44
         for <email2ether.denver@gmail.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 26 Feb 2024 09:58:52 -0800 (PST)
-From: KUAN TING PAN <kuanthedev@gmail.com>
+        Mon, 26 Feb 2024 13:52:44 -0800 (PST)
+From: =?utf-8?B?6Zmz5p+P5Y+h?= <a00012025@gmail.com>
 Content-Type: text/plain;
         charset=us-ascii
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 7bit
 Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3774.300.61.1.2\))
-Subject: Assign Wallet Owner
-Message-Id: <6343F0C4-14E0-422C-97AA-82769A6BFA99@gmail.com>
-Date: Mon, 26 Feb 2024 10:58:42 -0700
+Subject: Change owner to 0x0901549Bc297BCFf4221d0ECfc0f718932205e33
+Message-Id: <C3579A0E-184A-46D2-8194-A5B85899B609@gmail.com>
+Date: Mon, 26 Feb 2024 14:52:34 -0700
 To: email2ether.denver@gmail.com
 X-Mailer: Apple Mail (2.3774.300.61.1.2)
 
-Please change my wallet owner address to =
-0x0901549Bc297BCFf4221d0ECfc0f718932205e33=
+Please change wallet owner to 0x0901549Bc297BCFf4221d0ECfc0f718932205e33
