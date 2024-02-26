@@ -1,0 +1,12 @@
+{
+  "parts": [
+    {
+      "is_public": false,
+      "regex_def": "Please change my wallet owner address to =\r\n"
+    },
+    {
+      "is_public": true,
+      "regex_def": "0x[a-fA-F0-9]+"
+    }
+  ]
+}

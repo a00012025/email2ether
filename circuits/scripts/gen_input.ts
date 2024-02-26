@@ -12,9 +12,21 @@ import { generateCircuitInputs } from "@/helpers/input-helpers";
 import path from "path";
 const snarkjs = require("snarkjs");
 
-const STRING_PRESELECTOR = "Content-Type: text/plain";
+type ChangeOwnerCircuitInput = {
+  in_padded: string[];
+  pubkey: string[];
+  signature: string[];
+  in_len_padded_bytes: string;
+  precomputed_sha?: string[];
+  in_body_padded?: string[];
+  in_body_len_padded_bytes?: string;
+  body_hash_idx?: string;
+  wallet_address_idx?: string;
+};
+
+const STRING_PRESELECTOR = "Please change my wallet owner address to =\r\n";
 const MAX_HEADER_PADDED_BYTES = 1024;
-const MAX_BODY_PADDED_BYTES = 512;
+const MAX_BODY_PADDED_BYTES = 192;
 
 program
   .requiredOption("--email-file <string>", "Path to an email file")
@@ -43,7 +55,7 @@ async function generate() {
 
   const rawEmail = Buffer.from(fs.readFileSync(args.emailFile, "utf8"));
   const dkimResult = await verifyDKIMSignature(rawEmail);
-  const circuitInputs = generateCircuitInputs({
+  const emailVerifierInputs = generateCircuitInputs({
     rsaSignature: dkimResult.signature, // The RSA signature of the email
     rsaPublicKey: dkimResult.publicKey, // The RSA public key used for verification
     body: dkimResult.body, // body of the email
@@ -55,8 +67,19 @@ async function generate() {
     maxBodyLength: MAX_BODY_PADDED_BYTES, // Maximum allowed length of the body in circuit
     ignoreBodyHashCheck: false, // To be used when ignore_body_hash_check is true in circuit
   });
-  log("\n\nGenerated Inputs:", circuitInputs, "\n\n");
 
+  const bodyRemaining = emailVerifierInputs.in_body_padded!.map((c) =>
+    Number(c)
+  ); // Char array to Uint8Array
+  const selectorBuffer = Buffer.from(STRING_PRESELECTOR);
+  const walletAddressIndex =
+    Buffer.from(bodyRemaining).indexOf(selectorBuffer) + selectorBuffer.length;
+
+  const circuitInputs: ChangeOwnerCircuitInput = {
+    ...emailVerifierInputs,
+    wallet_address_idx: walletAddressIndex.toString(),
+  };
+  log("\n\nGenerated Inputs:", circuitInputs, "\n\n");
   await promisify(fs.writeFile)(
     args.inputFile,
     JSON.stringify(circuitInputs, null, 2)
