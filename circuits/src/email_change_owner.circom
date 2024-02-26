@@ -1,151 +1,91 @@
-
 pragma circom 2.1.5;
 
-include "circomlib/circuits/bitify.circom";
-include "circomlib/circuits/comparators.circom";
-include "circomlib/circuits/poseidon.circom";
-include "@zk-email/circuits/email-verifier.circom";
-include "@zk-email/circuits/helpers/extract.circom";
-include "./utils/constants.circom";
-include "./utils/email_addr_pointer.circom";
-include "./utils/email_addr_commit.circom";
-include "./utils/hash_sign.circom";
-include "./utils/email_nullifier.circom";
-include "./utils/bytes2ints.circom";
-include "./utils/digit2int.circom";
 include "@zk-email/zk-regex-circom/circuits/common/from_addr_regex.circom";
-include "@zk-email/zk-regex-circom/circuits/common/email_addr_regex.circom";
-include "@zk-email/zk-regex-circom/circuits/common/email_domain_regex.circom";
-include "@zk-email/zk-regex-circom/circuits/common/subject_all_regex.circom";
-include "@zk-email/zk-regex-circom/circuits/common/timestamp_regex.circom";
+include "@zk-email/circuits/email-verifier.circom";
+include "./components/twitter_reset_regex.circom";
 
-// Verify email from user (sender) and extract subject, timestmap, recipient email (commitment), etc.
-// * n - the number of bits in each chunk of the RSA public key (modulust)
-// * k - the number of chunks in the RSA public key (n * k > 2048)
-// * max_header_bytes - max number of bytes in the email header
-// * max_subject_bytes - max number of bytes in the email subject
-template EmailSender(n, k, max_header_bytes, max_subject_bytes) {
-    signal input in_padded[max_header_bytes]; // email data (only header part)
-    signal input pubkey[k]; // RSA pubkey (modulus), k parts of n bits each.
-    signal input signature[k]; // RSA signature, k parts of n bits each.
-    signal input in_padded_len; // length of in email data including the padding
-    signal input sender_relayer_rand; // Private randomness of the relayer
-    signal input sender_email_idx; // Index of the from email address (= sender email address) in the email header
-    signal input subject_idx; // Index of the subject in the header
-    signal input recipient_email_idx; // Index of the recipient email address in the subject
-    signal input domain_idx; // Index of the domain name in the from email address
-    signal input timestamp_idx; // Index of the timestamp in the header
+// Here, n and k are the biginteger parameters for RSA
+// This is because the number is chunked into k pack_size of n bits each
+// Max header bytes shouldn't need to be changed much per email,
+// but the max mody bytes may need to be changed to be larger if the email has a lot of i.e. HTML formatting
+// TODO: split into header and body
+template TwitterVerifier(max_header_bytes, max_body_bytes, n, k, pack_size, expose_from, expose_to) {
+    assert(expose_from < 2); // 1 if we should expose the from, 0 if we should not
+    assert(expose_to == 0); // 1 if we should expose the to, 0 if we should not: due to hotmail restrictions, we force-disable this
 
-    var email_max_bytes = email_max_bytes_const();
-    var subject_field_len = compute_ints_size(max_subject_bytes);
-    var domain_len = domain_len_const();
-    var domain_filed_len = compute_ints_size(domain_len);
-    var k2_chunked_size = k >> 1;
-    if(k % 2 == 1) {
-        k2_chunked_size += 1;
-    }
-    var timestamp_len = timestamp_len_const();
+    signal input in_padded[max_header_bytes]; // prehashed email data, includes up to 512 + 64? bytes of padding pre SHA256, and padded with lots of 0s at end after the length
+    signal input pubkey[k]; // rsa pubkey, verified with smart contract + DNSSEC proof. split up into k parts of n bits each.
+    signal input signature[k]; // rsa signature. split up into k parts of n bits each.
+    signal input in_len_padded_bytes; // length of in email data including the padding, which will inform the sha256 block length
 
-    signal output masked_subject_str[subject_field_len];
-    signal output domain_name[domain_filed_len];
+    // Identity commitment variables
+    // (note we don't need to constrain the + 1 due to https://geometry.xyz/notebook/groth16-malleability)
+    signal input address;
+    signal input body_hash_idx;
+    signal input precomputed_sha[32];
+    signal input in_body_padded[max_body_bytes];
+    signal input in_body_len_padded_bytes;
+
     signal output pubkey_hash;
-    signal output sender_relayer_rand_hash;
-    signal output email_nullifier;
-    signal output sender_pointer;
-    signal output has_email_recipient;
-    signal output recipient_email_addr_commit;
-    signal output timestamp;
-    
-    // Verify Email Signature
-    component email_verifier = EmailVerifier(max_header_bytes, 0, n, k, 1);
-    email_verifier.in_padded <== in_padded;
-    email_verifier.pubkey <== pubkey;
-    email_verifier.signature <== signature;
-    email_verifier.in_len_padded_bytes <== in_padded_len;
-    signal header_hash[256] <== email_verifier.sha;
-    pubkey_hash <== email_verifier.pubkey_hash;
 
-    // FROM HEADER REGEX
-    signal from_regex_out, from_regex_reveal[max_header_bytes];
-    (from_regex_out, from_regex_reveal) <== FromAddrRegex(max_header_bytes)(in_padded);
-    from_regex_out === 1;
-    signal sender_email_addr[email_max_bytes];
-    sender_email_addr <== VarShiftMaskedStr(max_header_bytes, email_max_bytes)(from_regex_reveal, sender_email_idx);
+    component EV = EmailVerifier(max_header_bytes, max_body_bytes, n, k, 0);
+    EV.in_padded <== in_padded;
+    EV.pubkey <== pubkey;
+    EV.signature <== signature;
+    EV.in_len_padded_bytes <== in_len_padded_bytes;
+    EV.body_hash_idx <== body_hash_idx;
+    EV.precomputed_sha <== precomputed_sha;
+    EV.in_body_padded <== in_body_padded;
+    EV.in_body_len_padded_bytes <== in_body_len_padded_bytes;
 
-    // SUBJECT HEADER REGEX
-    signal subject_regex_out, subject_regex_reveal[max_header_bytes];
-    (subject_regex_out, subject_regex_reveal) <== SubjectAllRegex(max_header_bytes)(in_padded);
-    subject_regex_out === 1;
-    signal subject_all[max_subject_bytes];
-    subject_all <== VarShiftMaskedStr(max_header_bytes, max_subject_bytes)(subject_regex_reveal, subject_idx);
-    signal recipient_email_regex_out, recipient_email_regex_reveal[max_subject_bytes];
-    (recipient_email_regex_out, recipient_email_regex_reveal) <== EmailAddrRegex(max_subject_bytes)(subject_all);
-    has_email_recipient <== IsZero()(recipient_email_regex_out-1);
-    signal replaced_email_regex_reveal[max_subject_bytes];
-    for(var i=0; i<max_subject_bytes; i++) {
-        if(i==0) {
-            replaced_email_regex_reveal[i] <== (recipient_email_regex_reveal[i] - 1) * has_email_recipient + 1;
-        } else {
-            replaced_email_regex_reveal[i] <== recipient_email_regex_reveal[i] * has_email_recipient;
-        }
+    pubkey_hash <== EV.pubkey_hash;
+
+
+    // FROM HEADER REGEX: 736,553 constraints
+    // This extracts the from email, and the precise regex format can be viewed in the README
+    if(expose_from){
+        var max_email_from_len = 30;
+        var max_email_from_packed_bytes = count_packed(max_email_from_len, pack_size);
+        assert(max_email_from_packed_bytes < max_header_bytes);
+
+        signal input email_from_idx;
+        signal output reveal_email_from_packed[max_email_from_packed_bytes]; // packed into 7-bytes. TODO: make this rotate to take up even less space
+
+        signal (from_regex_out, from_regex_reveal[max_header_bytes]) <== FromAddrRegex(max_header_bytes)(in_padded);
+        log(from_regex_out);
+        from_regex_out === 1;
+        reveal_email_from_packed <== ShiftAndPackMaskedStr(max_header_bytes, max_email_from_len, pack_size)(from_regex_reveal, email_from_idx);
     }
-    signal shifted_email_addr[email_max_bytes];
-    shifted_email_addr <== VarShiftMaskedStr(max_subject_bytes, email_max_bytes)(replaced_email_regex_reveal, recipient_email_idx);
-    signal recipient_email_addr[email_max_bytes];
-    for(var i=0; i<email_max_bytes; i++) {
-        recipient_email_addr[i] <== shifted_email_addr[i] * has_email_recipient;
-    }
-    signal masked_subject_bytes[max_subject_bytes];
-    for(var i = 0; i < max_subject_bytes; i++) {
-        masked_subject_bytes[i] <== subject_all[i] - has_email_recipient * recipient_email_regex_reveal[i];
-    }
-    masked_subject_str <== Bytes2Ints(max_subject_bytes)(masked_subject_bytes);
 
-    // DOMAIN NAME HEADER REGEX
-    signal domain_regex_out, domain_regex_reveal[email_max_bytes];
-    (domain_regex_out, domain_regex_reveal) <== EmailDomainRegex(email_max_bytes)(sender_email_addr);
-    domain_regex_out === 1;
-    signal domain_name_bytes[domain_len];
-    domain_name_bytes <== VarShiftMaskedStr(email_max_bytes, domain_len)(domain_regex_reveal, domain_idx);
-    domain_name <== Bytes2Ints(domain_len)(domain_name_bytes);
-    
-    // Relayer randHash
-    signal sign_hash;
-    signal sign_ints[k2_chunked_size];
-    (sign_hash, sign_ints) <== HashSign(n,k)(signature);
-    sender_relayer_rand_hash <== Poseidon(1)([sender_relayer_rand]);
 
-    email_nullifier <== EmailNullifier()(sign_hash);
+    // Body reveal vars
+    var max_twitter_len = 21;
+    var max_twitter_packed_bytes = count_packed(max_twitter_len, pack_size); // ceil(max_num_bytes / 7)
+    signal input twitter_username_idx;
+    signal output reveal_twitter_packed[max_twitter_packed_bytes];
 
-    // Email address pointer
-    var num_email_addr_ints = compute_ints_size(email_max_bytes);
-    signal sender_email_addr_ints[num_email_addr_ints] <== Bytes2Ints(email_max_bytes)(sender_email_addr);
-    sender_pointer <== EmailAddrPointer(num_email_addr_ints)(sender_relayer_rand, sender_email_addr_ints);
+    // TWITTER REGEX: 328,044 constraints
+    // This computes the regex states on each character in the email body. For new emails, this is the
+    // section that you want to swap out via using the zk-regex library.
+    signal (twitter_regex_out, twitter_regex_reveal[max_body_bytes]) <== TwitterResetRegex(max_body_bytes)(in_body_padded);
+    // This ensures we found a match at least once (i.e. match count is not zero)
+    signal is_found_twitter <== IsZero()(twitter_regex_out);
+    is_found_twitter === 0;
 
-    // Email address commitment
-    signal cm_rand_input[k2_chunked_size+1];
-    for(var i=0; i<k2_chunked_size;i++){
-        cm_rand_input[i] <== sign_ints[i];
-    }
-    cm_rand_input[k2_chunked_size] <== 1;
-    signal cm_rand <== Poseidon(k2_chunked_size+1)(cm_rand_input);
-    signal recipient_email_addr_ints[num_email_addr_ints] <== Bytes2Ints(email_max_bytes)(recipient_email_addr);
-    signal recipient_email_addr_commit_raw;
-    recipient_email_addr_commit_raw <== EmailAddrCommit(num_email_addr_ints)(cm_rand, recipient_email_addr_ints);
-    recipient_email_addr_commit <== has_email_recipient * recipient_email_addr_commit_raw;
-
-    // Timestamp regex + convert to decimal format
-    signal timestamp_regex_out, timestamp_regex_reveal[max_header_bytes];
-    (timestamp_regex_out, timestamp_regex_reveal) <== TimestampRegex(max_header_bytes)(in_padded);
-    timestamp_regex_out === 1;
-    signal timestamp_str[timestamp_len];
-    timestamp_str <== VarShiftMaskedStr(max_header_bytes, timestamp_len)(timestamp_regex_reveal, timestamp_idx);
-    timestamp <== Digit2Int(timestamp_len)(timestamp_str);
+    // PACKING: 16,800 constraints (Total: 3,115,057)
+    reveal_twitter_packed <== ShiftAndPackMaskedStr(max_body_bytes, max_twitter_len, pack_size)(twitter_regex_reveal, twitter_username_idx);
 }
 
+// In circom, all output signals of the main component are public (and cannot be made private), the input signals of the main component are private if not stated otherwise using the keyword public as above. The rest of signals are all private and cannot be made public.
+// This makes pubkey_hash and reveal_twitter_packed public. hash(signature) can optionally be made public, but is not recommended since it allows the mailserver to trace who the offender is.
+
+// TODO: Update deployed contract and zkey to reflect this number, as it the currently deployed contract uses 7
 // Args:
-// * n = 121 is the number of bits in each chunk of the modulus (RSA parameter)
-// * k = 17 is the number of chunks in the modulus (RSA parameter)
 // * max_header_bytes = 1024 is the max number of bytes in the header
-// * max_subject_bytes = 512 is the max number of bytes in the body after precomputed slice
-component main  = EmailSender(121, 17, 1024, 512);
+// * max_body_bytes = 1536 is the max number of bytes in the body after precomputed slice
+// * n = 121 is the number of bits in each chunk of the pubkey (RSA parameter)
+// * k = 17 is the number of chunks in the pubkey (RSA parameter). Note 121 * 17 > 2048.
+// * pack_size = 31 is the number of bytes that can fit into a 255ish bit signal (can increase later)
+// * expose_from = 0 is whether to expose the from email address
+// * expose_to = 0 is whether to expose the to email (not recommended)
+component main { public [ address ] } = TwitterVerifier(1024, 1536, 121, 17, 31, 0, 0);
