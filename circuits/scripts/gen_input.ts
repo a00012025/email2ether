@@ -1,14 +1,14 @@
 /**
  *
- * This script is for generating input for the email sender circuit.
+ * This script is for generating input for the change owner circuit.
  *
  */
 
 import { program } from "commander";
 import fs from "fs";
 import { promisify } from "util";
-import { verifyDKIMSignature } from "@zk-email/helpers/dkim";
-import { generateCircuitInputs } from "@zk-email/helpers/input-helpers";
+import { verifyDKIMSignature } from "@/helpers/dkim";
+import { generateCircuitInputs } from "@/helpers/input-helpers";
 import path from "path";
 const snarkjs = require("snarkjs");
 
@@ -18,7 +18,6 @@ const MAX_BODY_PADDED_BYTES = 512;
 
 program
   .requiredOption("--email-file <string>", "Path to an email file")
-  .requiredOption("--relayer-rand <string>", "Relayer's randomness")
   .requiredOption(
     "--input-file <string>",
     "Path of a json file to write the generated input"
@@ -65,24 +64,24 @@ async function generate() {
 
   log("Inputs written to", args.inputFile);
 
-  if (args.prove) {
-    const dir = path.dirname(args.inputFile);
-    const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-      circuitInputs,
-      path.join(dir, "email_sender.wasm"),
-      path.join(dir, "email_sender.zkey"),
-      console
-    );
-    await promisify(fs.writeFile)(
-      path.join(dir, "email_sender_proof.json"),
-      JSON.stringify(proof, null, 2)
-    );
-    await promisify(fs.writeFile)(
-      path.join(dir, "email_sender_public.json"),
-      JSON.stringify(publicSignals, null, 2)
-    );
-    log("✓ Proof for email sender circuit generated");
-  }
+  // if (args.prove) {
+  //   const dir = path.dirname(args.inputFile);
+  //   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+  //     circuitInputs,
+  //     path.join(dir, "email_sender.wasm"),
+  //     path.join(dir, "email_sender.zkey"),
+  //     console
+  //   );
+  //   await promisify(fs.writeFile)(
+  //     path.join(dir, "email_sender_proof.json"),
+  //     JSON.stringify(proof, null, 2)
+  //   );
+  //   await promisify(fs.writeFile)(
+  //     path.join(dir, "email_sender_public.json"),
+  //     JSON.stringify(publicSignals, null, 2)
+  //   );
+  //   log("✓ Proof for email sender circuit generated");
+  // }
   process.exit(0);
 }
 

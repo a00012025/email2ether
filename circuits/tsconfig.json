@@ -4,8 +4,11 @@
     "target": "ESNext",
     "module": "NodeNext",
     "declaration": true,
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "outDir": "dist",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
