@@ -17,6 +17,7 @@ type ChangeOwnerCircuitInput = {
   signature: string[];
   in_len_padded_bytes: string;
   sender_email_idx: string;
+  owner_address_idx: string;
 };
 
 const MAX_HEADER_PADDED_BYTES = 1024;
@@ -66,12 +67,17 @@ async function generate() {
     .join("");
 
   // get sender email index
-  const re =
+  const re_from =
     /(?:(?:\r\n)|^)from:(?:[^\r\n]+<)?([A-Za-z0-9!#$%&'\\*\\+-/=\\?^_`{\\|}~\\.]+@[A-Za-z0-9\\.-]+)/gm;
-  const match = Array.from(in_padded_str.matchAll(re))[0];
-  const sender_email = match[1];
+  const match_from = Array.from(in_padded_str.matchAll(re_from))[0];
+  const sender_email = match_from[1];
   const sender_email_idx =
-    match.index! + in_padded_str.substring(match.index!).indexOf(sender_email);
+    match_from.index! + in_padded_str.substring(match_from.index!).indexOf(sender_email);
+
+  const re_subject = /\r\nsubject:Change owner to 0x([a-fA-F0-9]+)/gm
+  const match_subject = Array.from(in_padded_str.matchAll(re_subject))[0];
+  const owner_address = match_subject[1];
+  const owner_address_idx = match_subject.index! + in_padded_str.substring(match_subject.index!).indexOf(owner_address);
 
   // not using body hash here
   const circuitInputs: ChangeOwnerCircuitInput = {
@@ -80,6 +86,7 @@ async function generate() {
     signature: emailVerifierInputs.signature,
     in_len_padded_bytes: emailVerifierInputs.in_len_padded_bytes,
     sender_email_idx: sender_email_idx.toString(),
+    owner_address_idx: owner_address_idx.toString(),
   };
 
   await promisify(fs.writeFile)(

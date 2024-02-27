@@ -14,9 +14,15 @@ dependencies:
   '@zk-email/zk-regex-circom':
     specifier: ^1.3.0
     version: 1.3.0
+  addressparser:
+    specifier: ^1.0.1
+    version: 1.0.1
   commander:
     specifier: ^12.0.0
     version: 12.0.0
+  libmime:
+    specifier: ^5.3.4
+    version: 5.3.4
   node-forge:
     specifier: ^1.3.1
     version: 1.3.1
@@ -92,6 +98,10 @@ packages:
     dependencies:
       commander: 11.1.0
       snarkjs: 0.7.3
+    dev: false
+
+  /addressparser@1.0.1:
+    resolution: {integrity: sha512-aQX7AISOMM7HFE0iZ3+YnD07oIeJqWGVnJ+ZIKaBZAk03ftmVYVqsGas/rbXKR21n4D/hKCSHypvcyOkds/xzg==}
     dev: false
 
   /ansi-styles@4.3.0:
@@ -208,6 +218,11 @@ packages:
       jake: 10.8.7
     dev: false
 
+  /encoding-japanese@2.0.0:
+    resolution: {integrity: sha512-++P0RhebUC8MJAwJOsT93dT+5oc5oPImp1HubZpAuCZ5kTLnhuuBhKHj2jJeO/Gj93idPBWmIuQ9QWMe5rX3pQ==}
+    engines: {node: '>=8.10.0'}
+    dev: false
+
   /escodegen@1.14.3:
     resolution: {integrity: sha512-qFcX0XJkdg+PB3xjZZG/wKSuT1PnQWx57+TVSjIMmILd2yC/6ByYElPwJnslDsuWuSAp4AwJGumarAAmJch5Kw==}
     engines: {node: '>=4.0'}
@@ -283,6 +298,13 @@ packages:
     engines: {node: '>= 6.0.0'}
     dev: false
 
+  /iconv-lite@0.6.3:
+    resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      safer-buffer: 2.1.2
+    dev: false
+
   /jake@10.8.7:
     resolution: {integrity: sha512-ZDi3aP+fG/LchyBzUM804VjddnwfSfsdeYkwt8NcbKRvo4rFkjhs456iLFn3k2ZUWvNe4i48WACDbza8fhq2+w==}
     engines: {node: '>=10'}
@@ -318,6 +340,23 @@ packages:
     dependencies:
       prelude-ls: 1.1.2
       type-check: 0.3.2
+    dev: false
+
+  /libbase64@1.3.0:
+    resolution: {integrity: sha512-GgOXd0Eo6phYgh0DJtjQ2tO8dc0IVINtZJeARPeiIJqge+HdsWSuaDTe8ztQ7j/cONByDZ3zeB325AHiv5O0dg==}
+    dev: false
+
+  /libmime@5.3.4:
+    resolution: {integrity: sha512-TsqPdercr6DHrnoQx1F0nS2Y4yPT+fWuOjEP2rqzvV77hMYWomTe/rpm0u9JORQ/FavEXybAGcBJsQbLr9+hjA==}
+    dependencies:
+      encoding-japanese: 2.0.0
+      iconv-lite: 0.6.3
+      libbase64: 1.3.0
+      libqp: 2.1.0
+    dev: false
+
+  /libqp@2.1.0:
+    resolution: {integrity: sha512-O6O6/fsG5jiUVbvdgT7YX3xY3uIadR6wEZ7+vy9u7PKHAlSEB6blvC1o5pHBjgsi95Uo0aiBBdkyFecj6jtb7A==}
     dev: false
 
   /logplease@1.2.15:
@@ -374,6 +413,10 @@ packages:
       '@iden3/binfileutils': 0.0.11
       fastfile: 0.0.20
       ffjavascript: 0.2.60
+    dev: false
+
+  /safer-buffer@2.1.2:
+    resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
     dev: false
 
   /snarkjs@0.7.3:
