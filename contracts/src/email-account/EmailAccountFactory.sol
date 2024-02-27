@@ -15,8 +15,8 @@ import "./EmailAccount.sol";
 contract EmailAccountFactory {
     EmailAccount public immutable accountImplementation;
 
-    constructor(IEntryPoint _entryPoint) {
-        accountImplementation = new EmailAccount(_entryPoint);
+    constructor(IEntryPoint _entryPoint, Verifier _verifier) {
+        accountImplementation = new EmailAccount(_entryPoint, _verifier);
     }
 
     /**

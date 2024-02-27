@@ -39,16 +39,12 @@ function arrayToBase256Number(arr: number[]): bigint {
   return number;
 }
 
-async function poseidonCircom(str: string) {
+async function poseidonCircom(circomArray: bigint[]) {
   const poseidon = await buildPoseidon();
 
-  const circomArray = stringToCircomArray(str);
-
   const res = poseidon(circomArray);
-
-  console.log(`Hash for ${str}: ${poseidon.F.toString(res)}`);
 
   return poseidon.F.toString(res);
 }
 
-export { poseidonCircom };
+export { poseidonCircom, stringToCircomArray };

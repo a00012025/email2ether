@@ -15,6 +15,7 @@ import 'account-abstraction/core/Helpers.sol';
 import "../callback/TokenCallbackHandler.sol";
 
 import { Verifier } from "./Verifier.sol";
+import '../utils/StringUtils.sol';
 
 /**
   * minimal account.
@@ -25,6 +26,7 @@ import { Verifier } from "./Verifier.sol";
 contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initializable {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
+    using StringUtils for *;
 
     address public owner;
     uint256 public emailHash;
@@ -37,9 +39,12 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
     bytes32 public constant gmailKeyHash = 0x1234567890123456789012345678901234567890123456789012345678901235;
     
     uint32 public constant pubKeyHashIndexInSignals = 0; // index of DKIM public key hash in signals array
-    uint32 public constant usernameIndexInSignals = 1; // index of first packed twitter username in signals array
-    uint32 public constant usernameLengthInSignals = 1; // length of packed twitter username in signals array
-    uint32 public constant addressIndexInSignals = 2; // index of ethereum address in signals array
+    uint32 public constant emailHashIndexInSignals = 1; // index of email hash in signals array
+    uint32 public constant ownerIndexInSignals = 2; // index of first packed owner address in signals array
+    uint32 public constant ownerLengthInSignals = 2; // length of packed owner address in signals array
+    uint32 public constant nullifierIndexInSignals = 4; // index of nullifier in signals array
+    Verifier public immutable verifier;
+    mapping(uint32 => bool) public usedNullifiers;
 
     event EmailAccountInitialized(IEntryPoint indexed entryPoint, uint256 indexed emailHash);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -58,8 +63,10 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(IEntryPoint anEntryPoint) {
+    constructor(IEntryPoint anEntryPoint, Verifier anVerifier) {
         _entryPoint = anEntryPoint;
+        verifier = anVerifier;
+
         _disableInitializers();
     }
 
@@ -75,9 +82,53 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
     /**
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      */
-    function transferOwnership(address newOwner) public virtual {
-        _requireNoneZeroAddress(newOwner);
-        _transferOwnership(newOwner);
+    function transferOwnership(uint256[8] memory proof, uint256[5] memory signals) public virtual {
+        // Verify the nullifier has not been used before
+        uint256 nullifier = signals[nullifierIndexInSignals];
+        require(!usedNullifiers[uint32(nullifier)], "nullifier has been used before");
+
+        // Verify the DKIM public key hash stored on-chain matches the one used in circuit
+        bytes32 dkimPublicKeyHashInCircuit = bytes32(signals[pubKeyHashIndexInSignals]);
+        require(
+            dkimPublicKeyHashInCircuit == appleEmailKeyHash || dkimPublicKeyHashInCircuit == gmailKeyHash,
+            "invalid public key hash"
+        );
+
+        // Verify the email hash stored on-chain matches the one used in circuit
+        uint256 emailHashInCircuit = signals[emailHashIndexInSignals];
+        require(emailHashInCircuit == emailHash, "invalid email hash");
+
+        // Veiry RSA and proof
+        // require(
+        //     verifier.verifyProof(
+        //         [proof[0], proof[1]],
+        //         [[proof[2], proof[3]], [proof[4], proof[5]]],
+        //         [proof[6], proof[7]],
+        //         signals
+        //     ),
+        //     "Invalid Proof"
+        // );
+
+        // Extract the owner chunks from the signals. 
+        uint256[] memory ownerAddressPack = new uint256[](ownerLengthInSignals);
+        for (uint256 i = ownerIndexInSignals; i < (ownerIndexInSignals + ownerLengthInSignals); i++) {
+            ownerAddressPack[i - ownerIndexInSignals] = signals[i];
+        }
+
+        // address newOwner = ownerAddressPack[0].toAddress();
+        // string memory messageBytes = StringUtils.convertPackedBytesToString(
+        //     ownerAddressPack,
+        //     bytesInPackedBytes * ownerLengthInSignals,
+        //     bytesInPackedBytes
+        // );
+        // address newOwner = address("0x" + messageBytes);
+        // tokenIDToName[tokenId] = messageBytes;
+        // _mint(msg.sender, tokenId);
+        // tokenCounter.increment();      
+
+
+
+        // _transferOwnership(newOwner);
     }
 
     /**
