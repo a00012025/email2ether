@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "gen-regex": "zk-regex decomposed -d ./src/components/change_owner.json -c ./src/components/change_owner.circom -t ChangeOwnerRegex -g true",
-    "build": "mkdir -p build && circom src/email_change_owner.circom --r1cs --wasm --sym -l ./node_modules -o ./build",
+    "build": "mkdir -p build && circom src/email_change_owner.circom --r1cs --c --wasm --sym -l ./node_modules -o ./build",
     "gen-input": "ts-node -r tsconfig-paths/register ./scripts/gen_input.ts --email-file ./test/test.eml --input-file inputs/inputs.json",
     "gen-witness": "node build/email_change_owner_js/generate_witness.js build/email_change_owner_js/email_change_owner.wasm inputs/inputs.json inputs/witness.wtns",
     "trusted-setup": "./scripts/trusted_setup.sh",
     "gen-proof": "snarkjs groth16 prove setup/email_change_owner_0001.zkey inputs/witness.wtns build/proof.json build/public.json",
+    "verify-proof": "snarkjs groth16 verify setup/verification_key.json build/public.json build/proof.json",
     "gen-verifier": "snarkjs zkey export solidityverifier setup/email_change_owner_0001.zkey build/Verifier.sol"
   },
   "keywords": [],
