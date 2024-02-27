@@ -5,6 +5,7 @@ include "@zk-email/zk-regex-circom/circuits/common/from_addr_regex.circom";
 include "circomlib/circuits/poseidon.circom";
 include "./components/change_owner.circom";
 include "./utils/constants.circom";
+include "./utils/email_nullifier.circom";
 
 // Here, n and k are the biginteger parameters for RSA
 // This is because the number is chunked into k pack_size of n bits each
@@ -29,6 +30,7 @@ template ChangeOwnerVerifier(max_header_bytes, max_body_bytes, n, k, pack_size) 
     EV.signature <== signature;
     EV.in_len_padded_bytes <== in_len_padded_bytes;
     pubkey_hash <== EV.pubkey_hash;
+    signal header_hash[256] <== EV.sha;
 
     // FROM HEADER REGEX, pack and output hash
     signal input sender_email_idx; // Index of the from email address (= sender email address) in the email header
@@ -55,6 +57,10 @@ template ChangeOwnerVerifier(max_header_bytes, max_body_bytes, n, k, pack_size) 
     var max_address_packed_bytes = count_packed(wallet_address_bytes, pack_size); // should be 2
     signal output reveal_owner_addr_packed[max_address_packed_bytes];
     reveal_owner_addr_packed <== ShiftAndPackMaskedStr(max_header_bytes, wallet_address_bytes, pack_size)(owner_address_regex_reveal, owner_address_idx);
+
+    // EMAIL NULLIFIER
+    signal output email_nullifier;
+    email_nullifier <== EmailNullifier()(header_hash);
 }
 
 // In circom, all output signals of the main component are public (and cannot be made private), the input signals of the main component are private if not stated otherwise using the keyword public as above. The rest of signals are all private and cannot be made public.
