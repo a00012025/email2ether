@@ -62,8 +62,8 @@ template ChangeOwnerVerifier(max_header_bytes, max_body_bytes, n, k, pack_size) 
 
 // Args:
 // * max_header_bytes = 768 is the max number of bytes in the header
-// * max_body_bytes = 128 is the max number of bytes in the body after precomputed slice
+// * max_body_bytes = 1024 is the max number of bytes in the body after precomputed slice (not used)
 // * n = 121 is the number of bits in each chunk of the pubkey (RSA parameter)
 // * k = 17 is the number of chunks in the pubkey (RSA parameter). Note 121 * 17 > 2048.
 // * pack_size = 31 is the number of bytes that can fit into a 255ish bit signal (can increase later)
-component main = ChangeOwnerVerifier(768, 128, 121, 17, 31);
+component main = ChangeOwnerVerifier(768, 1024, 121, 17, 31);

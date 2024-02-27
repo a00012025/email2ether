@@ -8,7 +8,9 @@
     "build": "mkdir -p build && circom src/email_change_owner.circom --r1cs --wasm --sym -l ./node_modules -o ./build",
     "gen-input": "ts-node -r tsconfig-paths/register ./scripts/gen_input.ts --email-file ./test/test.eml --input-file inputs/inputs.json",
     "gen-witness": "node build/email_change_owner_js/generate_witness.js build/email_change_owner_js/email_change_owner.wasm inputs/inputs.json inputs/witness.wtns",
-    "trusted-setup": "./scripts/trusted_setup.sh"
+    "trusted-setup": "./scripts/trusted_setup.sh",
+    "gen-proof": "snarkjs groth16 prove setup/email_change_owner_0001.zkey inputs/witness.wtns build/proof.json build/public.json",
+    "gen-verifier": "snarkjs zkey export solidityverifier setup/email_change_owner_0001.zkey build/Verifier.sol"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +31,7 @@
     "commander": "^12.0.0",
     "libmime": "^5.3.4",
     "node-forge": "^1.3.1",
+    "psl": "^1.9.0",
     "snarkjs": "^0.7.3"
   }
 }

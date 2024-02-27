@@ -1,0 +1,90 @@
+Delivered-To: email2ether.denver@gmail.com
+Received: by 2002:abe:f646:0:b0:394:7d99:5434 with SMTP id u67csp1930495vlh;
+        Tue, 27 Feb 2024 11:10:01 -0800 (PST)
+X-Received: by 2002:a17:902:7845:b0:1dc:a28b:d700 with SMTP id e5-20020a170902784500b001dca28bd700mr5029681pln.41.1709061000954;
+        Tue, 27 Feb 2024 11:10:00 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1709061000; cv=none;
+        d=google.com; s=arc-20160816;
+        b=ZM1UMPHxrJoIMOFwLqoBqT5asyi0xvLUJVcqERjiaWo285/zzSUYShhtqBm8V11wSv
+         g44WZV2lJKDl1mHzK+sxYiuXOgOqPpWRAv0aCs16ZtznCVm953uEkaizOuKuTDp2FhAw
+         owvubAMLA5qhYbA5jQb31EfdRX3l4vkbYqvzc1Jb7vXKiLr3E8GSJmYMncSbd0YxCdrv
+         6OS5U0tVmml7j9fJphwlHV0vDMxAFE9gsWRrrgF4O97CTwRDqdXVNxfRfCMmA/mz9eow
+         aYadeiPnZtVQKQ4xrerY+ldxgHT58+sBU1eedxP8oB3gWODNz4034aqwQukICWy2onN1
+         Onjg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=kPuvQngRHcmw8Jmt0MrPKV074zlh8x1rKO3BxnG7fj4=;
+        fh=lJ8TxFIO9UG6DJDyHpzBWQb+MEglSIjSejmkTBY9jEo=;
+        b=oWuVX8xmiyJf5cIckjEqa8e7NGzawME7YB8/13GCahDXQixlrdo3fDk3wzdvQBuAL7
+         /9rRYvPEPkX1Hm+0R3r01f5BhDpcl8YU9T9pVTnx3/YNaHvJO2a4XxTEtWL9nu3LkhM4
+         N/X8DK8vix/aoAmNk7+lNHzojWALD6zHQXs06vwQD1tAA80KSfYWst+No2abgZv7jx3P
+         qlJbnTAs7nxf9faL+BumaTVk9UiRqfgMe376RsG2h9xt6KJldLA0yR2XJ/QH//M1lwiw
+         Jh+kZLxUG0TncTz1JEl7obHczLH1cpy5mF9ClIA3nB7y/qJbdjouPnsJ5TLl9VK1UH28
+         x3Jg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20230601 header.b=el1HmvSB;
+       spf=pass (google.com: domain of a00012025@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=a00012025@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
+Return-Path: <a00012025@gmail.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id 2-20020a170902c10200b001dc411e77d6sor4505510pli.16.2024.02.27.11.10.00
+        for <email2ether.denver@gmail.com>
+        (Google Transport Security);
+        Tue, 27 Feb 2024 11:10:00 -0800 (PST)
+Received-SPF: pass (google.com: domain of a00012025@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20230601 header.b=el1HmvSB;
+       spf=pass (google.com: domain of a00012025@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=a00012025@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1709061000; x=1709665800; dara=google.com;
+        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=kPuvQngRHcmw8Jmt0MrPKV074zlh8x1rKO3BxnG7fj4=;
+        b=el1HmvSBQRGKGrmZFLZl1grZykKfP4GZkO2ADRBQ/8iJJFkyCVeD0QYBpJkMmGePIJ
+         e9Qoea17OMGoNY8oWSOq0ENEIlmJMftIcGZKYnt6UxoWr06ycadlh4MIzNRhflld8m33
+         3CpkSRFTy9H/3K3dPJnYIN7q602DAb3fOFuZfLln2d4By6xKk/bywOJ9rZX8AEN9rUuG
+         27bpZVrIExC6F4/SyVJjnIR81YqyX7wwX6ywfo6IaAMAmttVHaURifgeaOB9U71yy0zd
+         1pOPY4iNcrvgfNehux7GCcjfGc9GujiycoRDsyE+u3PiBww5vPF/Y9c+0E/UtyaK6Rgd
+         D8Ig==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1709061000; x=1709665800;
+        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=kPuvQngRHcmw8Jmt0MrPKV074zlh8x1rKO3BxnG7fj4=;
+        b=DzJp9YCX6PeoHmsANrcY5X/5BieBjgSkDGgZwrTftMvIb+bBeZM2dMZ7QQYoZhd6ll
+         sDyyP7LRNDUh37+DuYkVNTULYEPdcZCLUCLzXAENWnEAg8ZRZPZiDlluyBnFHK4JB+A5
+         dg4l/KCJwL4c0SArJAkoA1L3pmt+EGX0WvQ2wa+J39wSgHQ8TPMD+IsXxhtLOSe0Ky/t
+         pcMxWtgps+yekZomXzfCXIwCsikVBVHbGmWk/onBWH2xpi7H1KE5kSG/tQcI3jIRC3hg
+         FHPllJv2VjkpfAg0xptw7PyvljZjqsuerCoOs2pENIPi1wFshHJoTsx9+agdDPbzzvRn
+         VcXg==
+X-Gm-Message-State: AOJu0YyDP0DnjQ9TCUfoLIFrBf+qi6e2j3kcT91Dg8UeElDGa6DiTJfU
+        DY5W7NFh9asDOM9suk29GdTnHx9n6TQAI9y/dAaCV6o9/O+APd1CU4OiI93is2npJOPYw2P2vUi
+        k7XcWgbMt0gMdQi4bUpCKUsgk8SZCPK0iwvDeELi903k=
+X-Google-Smtp-Source: AGHT+IFNlLozZDAWcEhTzG9EdZUBwsKG39EBPr34xZYxUkQixQozSCiIk8/ylpPK0+EqnSATcoeebXHoRwgsQeWhvAg=
+X-Received: by 2002:a17:90a:bb88:b0:29a:7bec:32a0 with SMTP id
+ v8-20020a17090abb8800b0029a7bec32a0mr8512057pjr.49.1709060999968; Tue, 27 Feb
+ 2024 11:09:59 -0800 (PST)
+MIME-Version: 1.0
+From: =?UTF-8?B?6Zmz5p+P5Y+h?= <a00012025@gmail.com>
+Date: Tue, 27 Feb 2024 12:09:48 -0700
+Message-ID: <CAA0EUctE2TOMt=_Eg5t2NdvoKdF98h=tUFi4D-dk_Or7LuQwGw@mail.gmail.com>
+Subject: Change owner to 0x0901549Bc297BCFf4221d0ECfc0f718932205e33
+To: email2ether.denver@gmail.com
+Content-Type: multipart/alternative; boundary="000000000000cd8344061261c510"
+
+--000000000000cd8344061261c510
+Content-Type: text/plain; charset="UTF-8"
+
+Please change my contract wallet owner
+to 0x0901549Bc297BCFf4221d0ECfc0f718932205e33
+
+--000000000000cd8344061261c510
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Please change my contract wallet owner to=C2=A00x0901549Bc=
+297BCFf4221d0ECfc0f718932205e33</div>
+
+--000000000000cd8344061261c510--
