@@ -34,6 +34,9 @@ devDependencies:
   '@types/snarkjs':
     specifier: ^0.7.8
     version: 0.7.8
+  circomlib:
+    specifier: ^2.0.5
+    version: 2.0.5
   tsconfig-paths:
     specifier: ^4.2.0
     version: 4.2.0
@@ -163,6 +166,10 @@ packages:
     dependencies:
       ffjavascript: 0.2.60
     dev: false
+
+  /circomlib@2.0.5:
+    resolution: {integrity: sha512-O7NQ8OS+J4eshBuoy36z/TwQU0YHw8W3zxZcs4hVwpEll3e4hDm3mgkIPqItN8FDeLEKZFK3YeT/+k8TiLF3/A==}
+    dev: true
 
   /color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}

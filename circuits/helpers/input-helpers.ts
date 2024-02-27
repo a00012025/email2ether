@@ -112,7 +112,7 @@ type CircuitInput = {
   in_body_padded?: string[];
   in_body_len_padded_bytes?: string;
   body_hash_idx?: string;
-}
+};
 
 export function generateCircuitInputs(params: {
   body: Buffer;
@@ -124,7 +124,7 @@ export function generateCircuitInputs(params: {
   maxMessageLength: number;
   maxBodyLength: number;
   ignoreBodyHashCheck?: boolean;
-}) : CircuitInput {
+}): CircuitInput {
   const {
     rsaSignature,
     rsaPublicKey,
@@ -159,15 +159,14 @@ export function generateCircuitInputs(params: {
       maxRemainingBodyLength: maxBodyLength,
     });
 
-
-  const circuitInputs : CircuitInput = {
+  const circuitInputs: CircuitInput = {
     in_padded: Uint8ArrayToCharArray(messagePadded), // Packed into 1 byte signals
     pubkey: toCircomBigIntBytes(rsaPublicKey),
     signature: toCircomBigIntBytes(rsaSignature),
     in_len_padded_bytes: messagePaddedLen.toString(),
   };
 
-  if (!ignoreBodyHashCheck)  {
+  if (!ignoreBodyHashCheck) {
     const bodyHashIndex = message.toString().indexOf(bodyHash);
 
     circuitInputs.precomputed_sha = Uint8ArrayToCharArray(precomputedSha);
