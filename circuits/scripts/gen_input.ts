@@ -9,6 +9,10 @@ import fs from "fs";
 import { promisify } from "util";
 import { verifyDKIMSignature } from "@/helpers/dkim";
 import { generateCircuitInputs } from "@/helpers/input-helpers";
+import {
+  MAX_BODY_PADDED_BYTES,
+  MAX_HEADER_PADDED_BYTES,
+} from "@/helpers/constants";
 // const snarkjs = require("snarkjs");
 
 type ChangeOwnerCircuitInput = {
@@ -19,9 +23,6 @@ type ChangeOwnerCircuitInput = {
   sender_email_idx: string;
   owner_address_idx: string;
 };
-
-const MAX_HEADER_PADDED_BYTES = 1024;
-const MAX_BODY_PADDED_BYTES = 192;
 
 program
   .requiredOption("--email-file <string>", "Path to an email file")
@@ -72,12 +73,15 @@ async function generate() {
   const match_from = Array.from(in_padded_str.matchAll(re_from))[0];
   const sender_email = match_from[1];
   const sender_email_idx =
-    match_from.index! + in_padded_str.substring(match_from.index!).indexOf(sender_email);
+    match_from.index! +
+    in_padded_str.substring(match_from.index!).indexOf(sender_email);
 
-  const re_subject = /\r\nsubject:Change owner to 0x([a-fA-F0-9]+)/gm
+  const re_subject = /\r\nsubject:Change owner to 0x([a-fA-F0-9]+)/gm;
   const match_subject = Array.from(in_padded_str.matchAll(re_subject))[0];
   const owner_address = match_subject[1];
-  const owner_address_idx = match_subject.index! + in_padded_str.substring(match_subject.index!).indexOf(owner_address);
+  const owner_address_idx =
+    match_subject.index! +
+    in_padded_str.substring(match_subject.index!).indexOf(owner_address);
 
   // not using body hash here
   const circuitInputs: ChangeOwnerCircuitInput = {

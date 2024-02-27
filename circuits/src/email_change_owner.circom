@@ -52,7 +52,7 @@ template ChangeOwnerVerifier(max_header_bytes, max_body_bytes, n, k, pack_size) 
     signal owner_address_regex_out, owner_address_regex_reveal[max_header_bytes];
     (owner_address_regex_out, owner_address_regex_reveal) <== ChangeOwnerRegex(max_header_bytes)(in_padded);
     owner_address_regex_out === 1;
-    var max_address_packed_bytes = count_packed(wallet_address_bytes, pack_size);
+    var max_address_packed_bytes = count_packed(wallet_address_bytes, pack_size); // should be 2
     signal output reveal_owner_addr_packed[max_address_packed_bytes];
     reveal_owner_addr_packed <== ShiftAndPackMaskedStr(max_header_bytes, wallet_address_bytes, pack_size)(owner_address_regex_reveal, owner_address_idx);
 }
@@ -61,9 +61,9 @@ template ChangeOwnerVerifier(max_header_bytes, max_body_bytes, n, k, pack_size) 
 // This makes pubkey_hash and reveal_address_packed public. hash(signature) can optionally be made public, but is not recommended since it allows the mailserver to trace who the offender is.
 
 // Args:
-// * max_header_bytes = 1024 is the max number of bytes in the header
+// * max_header_bytes = 768 is the max number of bytes in the header
 // * max_body_bytes = 128 is the max number of bytes in the body after precomputed slice
 // * n = 121 is the number of bits in each chunk of the pubkey (RSA parameter)
 // * k = 17 is the number of chunks in the pubkey (RSA parameter). Note 121 * 17 > 2048.
 // * pack_size = 31 is the number of bytes that can fit into a 255ish bit signal (can increase later)
-component main = ChangeOwnerVerifier(1024, 128, 121, 17, 31);
+component main = ChangeOwnerVerifier(768, 128, 121, 17, 31);
