@@ -107,6 +107,7 @@ contract EmailAccount is
         uint256 nullifier = signals[nullifierIndexInSignals];
         require(nullifier < snark_scalar_field, "invalid nullifier");
         require(!usedNullifiers[nullifier], "nullifier has been used before");
+        usedNullifiers[nullifier] = true;
 
         // Verify the DKIM public key hash stored on-chain matches the one used in circuit
         bytes32 dkimPublicKeyHashInCircuit = bytes32(
