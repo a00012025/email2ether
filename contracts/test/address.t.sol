@@ -19,8 +19,7 @@ contract AddressTest is Test {
             bytesInPackedBytes * 2,
             bytesInPackedBytes
         );
-        console.log(messageBytes);
-        address recovered = address(bytes20(bytes(messageBytes)));
+        address recovered = stringToAddress(messageBytes); 
 
         assertEq(recovered, expected);
     }
@@ -86,5 +85,32 @@ contract AddressTest is Test {
         }
 
         return string(resultBytes);
+    }
+    function stringToAddress(string memory addressAsStringWithoutPrefix) public pure returns (address) {
+        bytes memory tmp = bytes(addressAsStringWithoutPrefix);
+        uint160 iaddr = 0;
+        uint160 b1;
+        uint160 b2;
+        for (uint i = 0; i < 2 * 20; i += 2) {
+            iaddr *= 256;
+            b1 = uint160(uint8(tmp[i]));
+            b2 = uint160(uint8(tmp[i + 1]));
+            if ((b1 >= 97) && (b1 <= 102)) {
+                b1 -= 87;
+            } else if ((b1 >= 65) && (b1 <= 70)) {
+                b1 -= 55;
+            } else if ((b1 >= 48) && (b1 <= 57)) {
+                b1 -= 48;
+            }
+            if ((b2 >= 97) && (b2 <= 102)) {
+                b2 -= 87;
+            } else if ((b2 >= 65) && (b2 <= 70)) {
+                b2 -= 55;
+            } else if ((b2 >= 48) && (b2 <= 57)) {
+                b2 -= 48;
+            }
+            iaddr += (b1 * 16 + b2);
+        }
+        return address(iaddr);
     }
 }

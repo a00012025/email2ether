@@ -99,15 +99,15 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
         require(emailHashInCircuit == emailHash, "invalid email hash");
 
         // Veiry RSA and proof
-        // require(
-        //     verifier.verifyProof(
-        //         [proof[0], proof[1]],
-        //         [[proof[2], proof[3]], [proof[4], proof[5]]],
-        //         [proof[6], proof[7]],
-        //         signals
-        //     ),
-        //     "Invalid Proof"
-        // );
+        require(
+            verifier.verifyProof(
+                [proof[0], proof[1]],
+                [[proof[2], proof[3]], [proof[4], proof[5]]],
+                [proof[6], proof[7]],
+                signals
+            ),
+            "Invalid Proof"
+        );
 
         // Extract the owner chunks from the signals. 
         uint256[] memory ownerAddressPack = new uint256[](ownerLengthInSignals);
@@ -115,20 +115,16 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
             ownerAddressPack[i - ownerIndexInSignals] = signals[i];
         }
 
-        // address newOwner = ownerAddressPack[0].toAddress();
-        // string memory messageBytes = StringUtils.convertPackedBytesToString(
-        //     ownerAddressPack,
-        //     bytesInPackedBytes * ownerLengthInSignals,
-        //     bytesInPackedBytes
-        // );
-        // address newOwner = address("0x" + messageBytes);
-        // tokenIDToName[tokenId] = messageBytes;
-        // _mint(msg.sender, tokenId);
-        // tokenCounter.increment();      
+        // Convert the owner chunks to an address
+        string memory messageBytes = StringUtils.convertPackedBytesToString(
+            ownerAddressPack,
+            bytesInPackedBytes * ownerLengthInSignals,
+            bytesInPackedBytes
+        );
+        address newOwner = StringUtils.stringToAddress(messageBytes);
 
-
-
-        // _transferOwnership(newOwner);
+        // Transfer ownership
+        _transferOwnership(newOwner);
     }
 
     /**

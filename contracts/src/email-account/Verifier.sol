@@ -20,7 +20,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-contract Groth16Verifier {
+contract Verifier {
     // Scalar field size
     uint256 constant r =
         21888242871839275222246405745257275088548364400416034343698204186575808495617;
@@ -105,7 +105,7 @@ contract Groth16Verifier {
                 if iszero(lt(v, q)) {
                     mstore(0, 0)
                     return(0, 0x20)
-                }
+                }   
             }
 
             // G1 function to multiply a G1 value(x,y) to value in an address
