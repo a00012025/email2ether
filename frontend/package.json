@@ -9,12 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.24.1",
     "framer-motion": "^11.0.6",
     "next": "14.1.0",
     "prettier": "^3.2.5",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.50.1",
+    "viem": "^2.7.15",
     "zustand": "^4.5.1"
   },
   "devDependencies": {
