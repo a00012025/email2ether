@@ -5,7 +5,10 @@ import readline from "readline";
 
 const TOKEN_PATH = "credentials/token.json";
 const CREDENTIALS_PATH = "credentials/credentials.json";
-const SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"];
+const SCOPES = [
+  "https://www.googleapis.com/auth/gmail.readonly",
+  "https://www.googleapis.com/auth/gmail.modify",
+];
 let gmail: ReturnType<typeof google.gmail>;
 
 export async function initEmailAuth() {
@@ -85,4 +88,55 @@ export async function getEmail(messageId: string): Promise<string> {
     console.error("Error retrieving email:", error);
     return "";
   }
+}
+
+export async function listenForNewEmails(
+  processEmail: (email: string) => Promise<void>,
+  interval: number = 60
+) {
+  console.log(`Starting to listen for new emails every ${interval} seconds`);
+
+  const checkEmails = async () => {
+    console.log("Checking for new emails");
+    try {
+      const res = await gmail.users.messages.list({
+        userId: "me",
+        labelIds: ["INBOX"], // Adjust if you want to check other labels
+        q: "is:unread", // Adjust this query to filter messages
+      });
+      const messages = res.data.messages || [];
+      for (const message of messages) {
+        const emailId = message.id;
+        if (!emailId) continue;
+        try {
+          await gmail.users.messages.modify({
+            userId: "me",
+            id: emailId,
+            requestBody: {
+              removeLabelIds: ["UNREAD"], // Removes the 'UNREAD' label
+            },
+          });
+        } catch (error) {
+          console.error("Error marking email as read");
+        }
+
+        const rawEmail = await getEmail(emailId);
+        if (rawEmail) {
+          console.log("Start processing email:", emailId);
+          processEmail(rawEmail)
+            .then(() => {
+              console.log("Finished processing email:", emailId);
+            })
+            .catch((error) => {
+              console.log("Error processing email:", emailId, error);
+            });
+        }
+      }
+    } catch (error) {
+      console.error("Error while checking for new emails:", error);
+    }
+  };
+
+  await checkEmails();
+  setInterval(checkEmails, interval * 1000);
 }
