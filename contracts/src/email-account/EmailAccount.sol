@@ -11,19 +11,24 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "account-abstraction/core/BaseAccount.sol";
-import 'account-abstraction/core/Helpers.sol';
+import "account-abstraction/core/Helpers.sol";
 import "../callback/TokenCallbackHandler.sol";
 
-import { Verifier } from "./Verifier.sol";
-import '../utils/StringUtils.sol';
+import {Verifier} from "./Verifier.sol";
+import "../utils/StringUtils.sol";
 
 /**
-  * minimal account.
-  *  this is sample minimal account.
-  *  has execute, eth handling methods
-  *  has a single signer that can send requests through the entryPoint.
-  */
-contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initializable {
+ * minimal account.
+ *  this is sample minimal account.
+ *  has execute, eth handling methods
+ *  has a single signer that can send requests through the entryPoint.
+ */
+contract EmailAccount is
+    BaseAccount,
+    TokenCallbackHandler,
+    UUPSUpgradeable,
+    Initializable
+{
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
     using StringUtils for *;
@@ -35,19 +40,27 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
 
     uint16 public constant bytesInPackedBytes = 31;
 
-    bytes32 public constant appleEmailKeyHash = 0x1234567890123456789012345678901234567890123456789012345678901234;
-    bytes32 public constant gmailKeyHash = 0x1234567890123456789012345678901234567890123456789012345678901235;
-    
+    bytes32 public constant appleEmailKeyHash =
+        0x1234567890123456789012345678901234567890123456789012345678901234;
+    bytes32 public constant gmailKeyHash =
+        0x0ea9c777dc7110e5a9e89b13f0cfc540e3845ba120b2b6dc24024d61488d4788;
+
     uint32 public constant pubKeyHashIndexInSignals = 0; // index of DKIM public key hash in signals array
     uint32 public constant emailHashIndexInSignals = 1; // index of email hash in signals array
     uint32 public constant ownerIndexInSignals = 2; // index of first packed owner address in signals array
     uint32 public constant ownerLengthInSignals = 2; // length of packed owner address in signals array
     uint32 public constant nullifierIndexInSignals = 4; // index of nullifier in signals array
     Verifier public immutable verifier;
-    mapping(uint32 => bool) public usedNullifiers;
+    mapping(uint256 => bool) public usedNullifiers;
 
-    event EmailAccountInitialized(IEntryPoint indexed entryPoint, uint256 indexed emailHash);
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event EmailAccountInitialized(
+        IEntryPoint indexed entryPoint,
+        uint256 indexed emailHash
+    );
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     modifier onlyOwner() {
         _onlyOwner();
@@ -58,7 +71,6 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
     function entryPoint() public view virtual override returns (IEntryPoint) {
         return _entryPoint;
     }
-
 
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
@@ -72,7 +84,10 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
 
     function _onlyOwner() internal view {
         //directly from EOA owner, or through the account itself (which gets redirected through execute())
-        require(msg.sender == owner || msg.sender == address(this), "only owner");
+        require(
+            msg.sender == owner || msg.sender == address(this),
+            "only owner"
+        );
     }
 
     function _requireNoneZeroAddress(address addr) internal pure {
@@ -82,15 +97,24 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
     /**
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      */
-    function transferOwnership(uint256[8] memory proof, uint256[5] memory signals) public virtual {
+    function transferOwnership(
+        uint256[8] memory proof,
+        uint256[5] memory signals
+    ) public virtual {
+        uint256 snark_scalar_field = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
+
         // Verify the nullifier has not been used before
         uint256 nullifier = signals[nullifierIndexInSignals];
-        require(!usedNullifiers[uint32(nullifier)], "nullifier has been used before");
+        require(nullifier < snark_scalar_field, "invalid nullifier");
+        require(!usedNullifiers[nullifier], "nullifier has been used before");
 
         // Verify the DKIM public key hash stored on-chain matches the one used in circuit
-        bytes32 dkimPublicKeyHashInCircuit = bytes32(signals[pubKeyHashIndexInSignals]);
+        bytes32 dkimPublicKeyHashInCircuit = bytes32(
+            signals[pubKeyHashIndexInSignals]
+        );
         require(
-            dkimPublicKeyHashInCircuit == appleEmailKeyHash || dkimPublicKeyHashInCircuit == gmailKeyHash,
+            dkimPublicKeyHashInCircuit == appleEmailKeyHash ||
+                dkimPublicKeyHashInCircuit == gmailKeyHash,
             "invalid public key hash"
         );
 
@@ -109,9 +133,13 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
             "Invalid Proof"
         );
 
-        // Extract the owner chunks from the signals. 
+        // Extract the owner chunks from the signals.
         uint256[] memory ownerAddressPack = new uint256[](ownerLengthInSignals);
-        for (uint256 i = ownerIndexInSignals; i < (ownerIndexInSignals + ownerLengthInSignals); i++) {
+        for (
+            uint256 i = ownerIndexInSignals;
+            i < (ownerIndexInSignals + ownerLengthInSignals);
+            i++
+        ) {
             ownerAddressPack[i - ownerIndexInSignals] = signals[i];
         }
 
@@ -140,7 +168,11 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
     /**
      * execute a transaction (called directly from owner, or by entryPoint)
      */
-    function execute(address dest, uint256 value, bytes calldata func) external {
+    function execute(
+        address dest,
+        uint256 value,
+        bytes calldata func
+    ) external {
         _requireFromEntryPointOrOwner();
         _call(dest, value, func);
     }
@@ -149,9 +181,17 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
      * execute a sequence of transactions
      * @dev to reduce gas consumption for trivial case (no value), use a zero-length array to mean zero value
      */
-    function executeBatch(address[] calldata dest, uint256[] calldata value, bytes[] calldata func) external {
+    function executeBatch(
+        address[] calldata dest,
+        uint256[] calldata value,
+        bytes[] calldata func
+    ) external {
         _requireFromEntryPointOrOwner();
-        require(dest.length == func.length && (value.length == 0 || value.length == func.length), "wrong array lengths");
+        require(
+            dest.length == func.length &&
+                (value.length == 0 || value.length == func.length),
+            "wrong array lengths"
+        );
         if (value.length == 0) {
             for (uint256 i = 0; i < dest.length; i++) {
                 _call(dest[i], 0, func[i]);
@@ -166,7 +206,7 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
     /**
      * @dev The _entryPoint member is immutable, to reduce gas consumption.  To upgrade EntryPoint,
      * a new implementation of EmailAccount must be deployed with the new EntryPoint address, then upgrading
-      * the implementation by calling `upgradeTo()`
+     * the implementation by calling `upgradeTo()`
      */
     function initialize(uint256 anEmailHash) public virtual initializer {
         _initialize(anEmailHash);
@@ -179,12 +219,17 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
 
     // Require the function call went through EntryPoint or owner
     function _requireFromEntryPointOrOwner() internal view {
-        require(msg.sender == address(entryPoint()) || msg.sender == owner, "account: not Owner or EntryPoint");
+        require(
+            msg.sender == address(entryPoint()) || msg.sender == owner,
+            "account: not Owner or EntryPoint"
+        );
     }
 
     /// implement template method of BaseAccount
-    function _validateSignature(PackedUserOperation calldata userOp, bytes32 userOpHash)
-    internal override virtual returns (uint256 validationData) {
+    function _validateSignature(
+        PackedUserOperation calldata userOp,
+        bytes32 userOpHash
+    ) internal virtual override returns (uint256 validationData) {
         bytes32 hash = userOpHash.toEthSignedMessageHash();
         if (owner != hash.recover(userOp.signature))
             return SIG_VALIDATION_FAILED;
@@ -192,7 +237,7 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
-        (bool success, bytes memory result) = target.call{value : value}(data);
+        (bool success, bytes memory result) = target.call{value: value}(data);
         if (!success) {
             assembly {
                 revert(add(result, 32), mload(result))
@@ -211,7 +256,7 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
      * deposit more funds for this account in the entryPoint
      */
     function addDeposit() public payable {
-        entryPoint().depositTo{value : msg.value}(address(this));
+        entryPoint().depositTo{value: msg.value}(address(this));
     }
 
     /**
@@ -219,11 +264,16 @@ contract EmailAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Ini
      * @param withdrawAddress target to send to
      * @param amount to withdraw
      */
-    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) public onlyOwner {
+    function withdrawDepositTo(
+        address payable withdrawAddress,
+        uint256 amount
+    ) public onlyOwner {
         entryPoint().withdrawTo(withdrawAddress, amount);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal view override {
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal view override {
         (newImplementation);
         _onlyOwner();
     }

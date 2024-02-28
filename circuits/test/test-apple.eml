@@ -1,0 +1,85 @@
+Delivered-To: email2ether.denver@gmail.com
+Received: by 2002:abe:f646:0:b0:394:7d99:5434 with SMTP id u67csp2107905vlh;
+        Tue, 27 Feb 2024 18:28:23 -0800 (PST)
+X-Received: by 2002:a05:6870:e98:b0:21e:6c0d:41cd with SMTP id mm24-20020a0568700e9800b0021e6c0d41cdmr12753765oab.38.1709087303611;
+        Tue, 27 Feb 2024 18:28:23 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1709087303; cv=none;
+        d=google.com; s=arc-20160816;
+        b=tew/eCNHwBV0aJFgz3GwcNrvvEnUP9Yw0StC0+USkTrKR9QFX74dmRxRCkdse2BELh
+         HVx3xxQOWAKNYWP7fGPxzAzMepLionaPHgrfNng3o42L/ymcQ9NxCdSg6prQWFCvaBDe
+         l26/CVKBZDRr1Gm8HRhF4jWpRBtQrjG6U9y1Dzk/rch7Y5WAo+Bzrx5SgvI7GG2V42ri
+         WXPqCSg6/8Ttpyy8PLEC/PivOL9O9MSqMRIOQmYMpgsEtMfaYLuzorWoiqdgPUafNVIK
+         dFCdYqbCZpEEzTooWFkWUMHLTO8W38vRiquvVTQJjSBnBlIokTsD/KTenjn4zyOtspru
+         4Thw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=to:date:message-id:subject:mime-version:content-transfer-encoding
+         :from:dkim-signature;
+        bh=CIT2pIQde5RvVrphtQX6UW4Hi0alribPkzlcKDwO7sE=;
+        fh=lJ8TxFIO9UG6DJDyHpzBWQb+MEglSIjSejmkTBY9jEo=;
+        b=Hv4Ua0kG7lD0L4iNLi2NQwd2TkP7RVXPPpv5MZQn1CAFf/L8NpLySqkD13MtnqRXA3
+         QB1eYBsiDwdTKwJVBQNqoxrOWyti9HsfrFLpebdeZqbkGiRTrKWTYJntJYDmqzb0tece
+         UeChNsXN5fRwVPtIJ3lrU3xGqilV/YUEKalbdqHP5Hj1kabpYHTYU3jQSNhzIyz+8xwn
+         HGM/UU9pS/YNHgUwfnq1WLtkQYrcsM5CeUvQwjdqhOOvPf8TUgJCnhHQfb6dDuDSQ7X8
+         QWFZYU4oCqHAHohjqwRKUg+Tx0NdHKKedjDY7CP4IWNSzmYJXphBlbnn87qCedt4GblV
+         I2Zg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20230601 header.b=DdforNSg;
+       spf=pass (google.com: domain of a00012025@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=a00012025@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
+Return-Path: <a00012025@gmail.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id b5-20020a056870918500b0021d5dcfb16esor2949454oaf.16.2024.02.27.18.28.23
+        for <email2ether.denver@gmail.com>
+        (Google Transport Security);
+        Tue, 27 Feb 2024 18:28:23 -0800 (PST)
+Received-SPF: pass (google.com: domain of a00012025@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20230601 header.b=DdforNSg;
+       spf=pass (google.com: domain of a00012025@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=a00012025@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1709087302; x=1709692102; dara=google.com;
+        h=to:date:message-id:subject:mime-version:content-transfer-encoding
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=CIT2pIQde5RvVrphtQX6UW4Hi0alribPkzlcKDwO7sE=;
+        b=DdforNSgItaI8Xc4WxUaOGSiWPgXRhrtuM5IEWAJWDcc2Uq/SN8Mkdfa+FBV/Pn04k
+         Rpc+XTOh3vVhosIiiELttN75T8qVrQ5UdfzVCubEcJbye8ZInI7LM4G/st5bXn973KYk
+         QuWdGl1RtFrxzCHfmFky8exj/VgkzNit61IsI/Brg0VLz8Mf2ZQrdAUhKVkS3iwfPhbY
+         wL2T7Jy5L0C/dEcVh0fCDu5rA9RaN23O5Y6mATG2FgU6LMXUZwe9VXX4vQ3zlSdWcdWQ
+         hJiPkjdT/kO5sJ+Cs5Q9T8zVHTx0Nqp3jD+K+TGwCRGVPyjzeXKKpC9vqon/lGkrvIrG
+         4p6Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1709087302; x=1709692102;
+        h=to:date:message-id:subject:mime-version:content-transfer-encoding
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=CIT2pIQde5RvVrphtQX6UW4Hi0alribPkzlcKDwO7sE=;
+        b=N/6DLHp96q/xdwthCs2WVy6LEqOfbHIKrzlETB8KcfPNnGPNZsWnU1qLkfcPyDsUw+
+         yuNal2fKQji4sPBhxvLKOVQ6OV0iFAVMv60U1vCRBpMDoFRPeKHbISl6epd1YzXZysCW
+         NHtDbH5SS/yUqxpuDZ4XEgOlCOuDl1vUg5lwAI+wnqPuvKow4h1FSzMpdHWszoLA0pfp
+         CM6adC014zh7IWQx5iKsigKduB0df2FqWtrBIv9kpSyFiufeJnjYbtRkVHo7arZjjjos
+         3w1CS4GpGYPJg+w2UGak2LMVaOewxcZ/D1SXhUv2c5kpmHVCrTL6jloCIkJPBS8gQTn1
+         +BmA==
+X-Gm-Message-State: AOJu0YxUrkTDlJKiEnfzsMJb0v2lNAJUdTv78NiBU7kAOEZ7eBLSeeAR
+        s1zw11Wm8IK9/B4fpUh4vU67AeJxUQx22UJo6+wnTI9URaQ0xlW0mvNfAIhjHkZJfJfu
+X-Google-Smtp-Source: AGHT+IHqYKIfmO8ph0+2ye0aGbE8EtoPdHi2GpJ7q4MhBdkNDglfPFbsJHU5QArzlPrZ26eSwpDoPA==
+X-Received: by 2002:a05:6870:ac0d:b0:21e:8853:5edb with SMTP id kw13-20020a056870ac0d00b0021e88535edbmr14184175oab.6.1709087302538;
+        Tue, 27 Feb 2024 18:28:22 -0800 (PST)
+Return-Path: <a00012025@gmail.com>
+Received: from smtpclient.apple (63-149-110-249.dia.static.qwest.net. [63.149.110.249])
+        by smtp.gmail.com with ESMTPSA id s1-20020a0568301e0100b006e4a134ac46sm910742otr.29.2024.02.27.18.28.21
+        for <email2ether.denver@gmail.com>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 27 Feb 2024 18:28:22 -0800 (PST)
+From: =?utf-8?B?6Zmz5p+P5Y+h?= <a00012025@gmail.com>
+Content-Type: text/plain;
+        charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3774.300.61.1.2\))
+Subject: Change owner to 0x0901549Bc297BCFf4221d0ECfc0f718932205e33
+Message-Id: <538C503F-2F66-4E66-B216-81A2F396E1B1@gmail.com>
+Date: Tue, 27 Feb 2024 19:28:11 -0700
+To: email2ether.denver@gmail.com
+X-Mailer: Apple Mail (2.3774.300.61.1.2)
+
+Please change owner to 0x0901549Bc297BCFf4221d0ECfc0f718932205e33

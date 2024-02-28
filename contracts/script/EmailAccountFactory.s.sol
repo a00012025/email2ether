@@ -14,10 +14,12 @@ contract Deployer is Script {
 
     function run() external {
         vm.startBroadcast(deployerPrivateKey);
-        
         Verifier verifier = new Verifier();
-        EmailAccountFactory factory = new EmailAccountFactory(IEntryPoint(entryPoint), verifier);
-
+        EmailAccountFactory factory = new EmailAccountFactory(
+            IEntryPoint(entryPoint),
+            verifier
+        );
+        console.log("Factory address: ", address(factory));
         vm.stopBroadcast();
     }
 }
