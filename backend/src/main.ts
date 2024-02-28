@@ -7,8 +7,7 @@ import {
   initWallet,
   transferOwnership,
 } from "./wallet";
-import dotenv from "dotenv";
-dotenv.config();
+require("dotenv").config();
 
 async function main() {
   await initEmailAuth();
@@ -25,13 +24,15 @@ async function main() {
   console.log("Proof generated. Email hash:", emailHash);
 
   // create email account
-  await createEmailAccount(emailHash);
+  let txHash = await createEmailAccount(emailHash);
   const accountAddress = await getEmailAccountAddress(emailHash);
-  console.log("Contract account created. Address:", accountAddress);
+  console.log(
+    `Contract account created. Address: ${accountAddress}, txHash: ${txHash}`
+  );
 
   // send proof to chain
-  const res = await transferOwnership(accountAddress, proof, publicSignals);
-  console.log("Ownership transferred", res);
+  txHash = await transferOwnership(accountAddress, proof, publicSignals);
+  console.log("Ownership transferred. txHash:", txHash);
 }
 
 main().catch(console.error);

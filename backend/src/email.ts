@@ -60,7 +60,7 @@ export async function getOneEmail() {
   if (!messages || messages.length === 0) {
     throw new Error("No messages found");
   }
-  const latestEmailId = messages[2].id;
+  const latestEmailId = messages[0].id;
   if (!latestEmailId) {
     throw new Error("No email found");
   }

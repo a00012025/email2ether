@@ -8,6 +8,7 @@ import EmailAccountAbi from "./abi/EmailAccount";
 import { arbitrumSepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import EmailAccountFactoryAbi from "./abi/EmailAccountFactory";
+require("dotenv").config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const RPC_URL = process.env.RPC_URL;
@@ -61,7 +62,7 @@ export async function transferOwnership(
     client: walletClient,
   });
 
-  await emailAccount.write.transferOwnership([proof, publicSignals], {
+  return await emailAccount.write.transferOwnership([proof, publicSignals], {
     nonce: currentNonce++,
   });
 }
