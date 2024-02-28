@@ -4,9 +4,9 @@ out = "out"
 libs = ["lib"]
 
 [rpc_endpoints]
-sepolia = "${SEPOLIA_RPC_URL}"
+arbitrum-sepolia = "https://sepolia-rollup.arbitrum.io/rpc"
 
 [etherscan]
-sepolia = { key = "${ETHERSCAN_API_KEY}" }
+arbitrum-sepolia = { key = "${ARBISCAN_API_KEY}" }
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

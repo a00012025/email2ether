@@ -113,7 +113,7 @@ func main() {
 		return
 	}
 	for _, l := range mailRes.Messages {
-		fmt.Printf("- %s\n", l.Id)
+		// fmt.Printf("- %s\n", l.Id)
 		GetEmail(srv, l.Id)
 		break
 	}
