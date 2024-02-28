@@ -56,5 +56,5 @@ export async function generateInputs(rawEmail: string) {
     sender_email_idx: sender_email_idx.toString(),
     owner_address_idx: owner_address_idx.toString(),
   };
-  return circuitInputs;
+  return { circuitInputs, sender_email };
 }

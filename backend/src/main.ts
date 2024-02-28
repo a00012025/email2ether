@@ -5,6 +5,19 @@ import readline from "readline";
 import { generateInputs } from "./gen-input";
 import { generateWitness } from "./gen-witness";
 import shelljs from "shelljs";
+import { poseidonCircom, stringToCircomArray } from "./utils/poseidon-circom";
+import EmailAccountFactoryAbi from "./abi/EmailAccountFactory";
+import EmailAccountAbi from "./abi/EmailAccount";
+import {
+  createPublicClient,
+  http,
+  getContract,
+  createWalletClient,
+} from "viem";
+import { arbitrumSepolia } from "viem/chains";
+import dotenv from "dotenv";
+import { privateKeyToAccount } from "viem/accounts";
+dotenv.config();
 
 const TOKEN_PATH = "credentials/token.json";
 const CREDENTIALS_PATH = "credentials/credentials.json";
@@ -96,15 +109,23 @@ async function getEmail(messageId: string): Promise<string> {
   }
 }
 
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const RPC_URL = process.env.RPC_URL;
+
 async function main() {
+  if (!PRIVATE_KEY || !RPC_URL) {
+    console.error("PRIVATE_KEY or RPC_URL env variable is missing");
+    return;
+  }
+
   await init();
   const email = await getOneEmail();
   if (!email) {
     console.error("No email found");
     return;
   }
-  const inputs = await generateInputs(email);
-  console.log("Input generated");
+  const { circuitInputs: inputs, sender_email } = await generateInputs(email);
+  console.log("Input generated. Email:", sender_email);
   const witness = await generateWitness(
     inputs,
     "./src/witness/email_change_owner.wasm"
@@ -120,6 +141,63 @@ async function main() {
     `./rapidsnark ../circuits/setup/email_change_owner_0001.zkey ${witnessFile} ${proofFile} ${publicFile}`
   );
   console.log("Proof generated");
+
+  // calculate email hash
+  const circomArray = stringToCircomArray(sender_email);
+  const emailHash: string = await poseidonCircom(circomArray);
+  const walletClient = createWalletClient({
+    account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
+    chain: arbitrumSepolia,
+    transport: http(),
+  });
+  const publicClient = createPublicClient({
+    chain: arbitrumSepolia,
+    transport: http(),
+  });
+  const accountFactory = getContract({
+    address: process.env.ACCOUNT_FACTORY_CONTRACT_ADDRESS! as `0x${string}`,
+    abi: EmailAccountFactoryAbi,
+    client: walletClient,
+  });
+  const nonce = await publicClient.getTransactionCount({
+    address: walletClient.account.address as `0x${string}`,
+  });
+
+  const tx1 = await accountFactory.write.createAccount(
+    [BigInt(emailHash), 0n] as const,
+    { nonce: nonce }
+  );
+  console.log("Contract account created. Tx:", tx1);
+
+  const accountAddress = await accountFactory.read.getAddress([
+    BigInt(emailHash),
+    0n,
+  ]);
+
+  // send proof on chain
+  const proofJSON = JSON.parse(fs.readFileSync(proofFile, "utf-8"));
+  const publicSignalsJSON = JSON.parse(fs.readFileSync(publicFile, "utf-8"));
+  const proof = [
+    BigInt(proofJSON.pi_a[0]),
+    BigInt(proofJSON.pi_a[1]),
+    BigInt(proofJSON.pi_b[0][1]),
+    BigInt(proofJSON.pi_b[0][0]),
+    BigInt(proofJSON.pi_b[1][1]),
+    BigInt(proofJSON.pi_b[1][0]),
+    BigInt(proofJSON.pi_c[0]),
+    BigInt(proofJSON.pi_c[1]),
+  ] as const;
+  const publicSignals = publicSignalsJSON.map((x: string) => BigInt(x));
+  const emailAccount = getContract({
+    address: accountAddress,
+    abi: EmailAccountAbi,
+    client: walletClient,
+  });
+  const res = await emailAccount.write.transferOwnership(
+    [proof, publicSignals],
+    { nonce: nonce + 1 }
+  );
+  console.log("Ownership transferred", res);
 }
 
 main().catch(console.error);
