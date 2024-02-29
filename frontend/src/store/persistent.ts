@@ -18,7 +18,7 @@ type StoreFunctions = {
   setEmail: (email: string) => void;
 };
 
-export const useStore = create<StoreState & StoreFunctions>()(
+export const usePersistentStore = create<StoreState & StoreFunctions>()(
   persist(
     (set, get) => ({
       ...initialState,

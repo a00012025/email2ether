@@ -1,12 +1,27 @@
 "use client";
+import { usePersistentStore } from "@/store/persistent";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
+interface FormData {
+  email: string;
+}
+
 export default function Step1() {
-  const [email, setEmail] = useState("");
-  const { register, handleSubmit } = useForm(); // Assuming useForm is already defined
-  const onSubmit = (data) => console.log(data);
+  const { register, handleSubmit } = useForm<FormData>();
+  const registerEmail = usePersistentStore((state) => state.setEmail);
+  const router = useRouter();
+
+  const onSubmit = (data: FormData) => {
+    // Basic email check
+    if (data.email && data.email.includes("@") && data.email.includes(".")) {
+      registerEmail(data.email);
+      router.push("/steps/2");
+    } else {
+      console.log("Invalid email");
+    }
+  };
 
   return (
     <form
@@ -20,8 +35,6 @@ export default function Step1() {
           id="email"
           type="email"
           {...register("email")}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
           style={{ width: "100%" }}
           className="flex mt-1 px-4 py-1 border rounded-lg h-12 w-max text-xl font-bold"
         />
