@@ -15,7 +15,7 @@ const initialState: StoreState = {
 };
 
 type StoreFunctions = {
-  setupNewAccount: () => void;
+  setupNewAccount: () => Account;
   setEmail: (email: string) => void;
 };
 
@@ -28,6 +28,7 @@ export const usePersistentStore = create<StoreState & StoreFunctions>()(
           const privateKey = generatePrivateKey();
           set({ account: privateKeyToAccount(privateKey) });
         }
+        return get().account as Account;
       },
       setEmail: (email: string) => {
         set({ email });

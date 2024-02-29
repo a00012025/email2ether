@@ -1,12 +1,12 @@
 "use client";
 
 import AnimatedButton from "@/components/Button";
-import abi from "@/constants/abi";
+import EmailAccountFactoryAbi from "@/constants/EmailAccountFactoryAbi";
 import { publicClient } from "@/lib/wallet";
 import { getHashedEmail, usePersistentStore } from "@/store/persistent";
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
-import { Address, getContract } from "viem";
+import { useEffect, useState } from "react";
+import { Address } from "viem";
 
 const Loading = ({ title }: { title: string }) => {
   return (
@@ -28,62 +28,91 @@ const Loading = ({ title }: { title: string }) => {
 };
 
 interface MainContentProps {
-  contractWalletAddress: Address | undefined;
-  eoaAddress: Address | undefined;
+  contractWalletAddress: Address;
+  eoaAddress: Address;
+}
+
+function MailtoLink({ changeAddress }: { changeAddress: Address }) {
+  const to = "email2ether.denver@gmail.com";
+  const subject = encodeURIComponent(`Change owner to ${changeAddress}`);
+  const body = encodeURIComponent(
+    "Please do not modify the subject of this email.Thank you."
+  );
+
+  const mailtoHref = `mailto:${to}?subject=${subject}&body=${body}`;
+  const handleEmail = () => {
+    window.location.href = mailtoHref;
+  };
+
+  return (
+    <AnimatedButton onClick={handleEmail}>
+      Send email to claim account
+    </AnimatedButton>
+  );
 }
 
 function MainContent({ eoaAddress, contractWalletAddress }: MainContentProps) {
-  const handleClick = () => {
-    window.location.href = "mailto:xxx";
-  };
-
   return (
     <>
       <div className="text-xl font-bold">Verify your email</div>
       <div>Your contract wallet address: {contractWalletAddress}</div>
       <div>Your session wallet address: {eoaAddress}</div>
-
-      <div className="flex flex-1 justify-around items-center flex-col w-full h-max">
-        <AnimatedButton onClick={handleClick}>Verify Email</AnimatedButton>
-      </div>
+      if
+      {contractWalletAddress !== undefined &&
+        eoaAddress &&
+        contractWalletAddress !== eoaAddress}{" "}
+      {
+        <div className="flex flex-1 justify-around items-center flex-col w-full h-max">
+          <MailtoLink changeAddress={contractWalletAddress} />
+        </div>
+      }
     </>
   );
 }
 
+const EMAIL_FACTORY_ADDRESS = "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7";
 export default function VerifyEmail() {
   const [loading, setLoading] = useState(true);
   const account = usePersistentStore((state) => state.account);
   const email = usePersistentStore((state) => state.email);
-  const [smartAddress, setSmartAddress] = useState<Address | undefined>();
+  const [smartAddress, setSmartAddress] = useState<Address>();
   const setupNewAccount = usePersistentStore((state) => state.setupNewAccount);
-  console.log("account", account);
 
-  const contract = useMemo(() => {
-    return getContract({
-      address: "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7",
-      abi,
-      client: publicClient,
-    });
-  }, []);
+  useEffect(() => {
+    if (smartAddress) {
+      const unwatch = publicClient.watchEvent({
+        address: smartAddress,
+        pollingInterval: 5000,
+        onLogs: (logs) => {
+          console.log("Event Logs", logs);
+          // do something when th
+        },
+      });
+
+      console.log("Watching for events");
+
+      return () => {
+        console.log("stop watching for events");
+        unwatch();
+      };
+    }
+  }, [smartAddress]);
 
   useEffect(() => {
     async function setupAccount() {
-      if (account && email) {
+      if (email) {
         const hashedEmail = await getHashedEmail(email);
-        console.log("hashedEmail", hashedEmail);
-        console.log("contract", contract);
 
-        const smartAddress = await contract?.read.getAddress([
-          hashedEmail,
-          BigInt(0),
-        ]);
-
-        console.log("smartAddress", smartAddress);
+        const smartAddress = await publicClient.readContract({
+          address: EMAIL_FACTORY_ADDRESS,
+          functionName: "getAddress",
+          abi: EmailAccountFactoryAbi,
+          args: [hashedEmail, BigInt(0)],
+        });
 
         return smartAddress;
       } else {
-        console.log("Setting up new account because no account found");
-        setupNewAccount();
+        console.log("No email found, please reset email");
       }
     }
 
@@ -93,18 +122,13 @@ export default function VerifyEmail() {
       .finally(() => setLoading(false));
   }, [account, email]);
 
-  if (loading) {
+  if (loading || !account || !smartAddress) {
     return <Loading title="Finding your account..." />;
-  }
-
-  function handleClick() {
-    window.location.href = "mailto:test@example.com";
-    console.log("Clicked");
   }
 
   return (
     <MainContent
-      eoaAddress={account?.address}
+      eoaAddress={account.address}
       contractWalletAddress={smartAddress}
     />
   );
