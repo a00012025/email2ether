@@ -1,7 +1,7 @@
 import { Account } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 interface StoreState {
   account: Account | null;
@@ -34,7 +34,7 @@ export const usePersistentStore = create<StoreState & StoreFunctions>()(
     }),
     {
       name: "persistent-user-account-storage",
-      getStorage: () => localStorage,
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );
