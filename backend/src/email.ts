@@ -92,7 +92,7 @@ export async function getEmail(messageId: string): Promise<string> {
 
 export async function listenForNewEmails(
   processEmail: (email: string) => Promise<void>,
-  interval: number = 60
+  interval: number = 3
 ) {
   console.log(`Starting to listen for new emails every ${interval} seconds`);
 
