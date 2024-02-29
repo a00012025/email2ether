@@ -97,7 +97,6 @@ export async function listenForNewEmails(
   console.log(`Starting to listen for new emails every ${interval} seconds`);
 
   const checkEmails = async () => {
-    console.log("Checking for new emails");
     try {
       const res = await gmail.users.messages.list({
         userId: "me",
