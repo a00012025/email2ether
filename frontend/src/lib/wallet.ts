@@ -1,5 +1,19 @@
-import { Account, Client, createWalletClient, http, publicActions } from "viem";
+import {
+  Account,
+  Client,
+  createPublicClient,
+  createWalletClient,
+  http,
+  publicActions,
+} from "viem";
 import { arbitrumSepolia } from "viem/chains";
+
+export const publicClient = createPublicClient({
+  chain: arbitrumSepolia,
+  transport: http(
+    "https://arb-sepolia.g.alchemy.com/v2/jDR80Y23Gv4tPFHxHpPVwOK6PE4_a3kL"
+  ),
+});
 
 let client: Client | null = null;
 function createClientFromAccount(account: Account) {

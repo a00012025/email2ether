@@ -1,3 +1,4 @@
+import { poseidonCircom, stringToCircomArray } from "@/lib/crypto";
 import { Account } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { create } from "zustand";
@@ -38,3 +39,18 @@ export const usePersistentStore = create<StoreState & StoreFunctions>()(
     }
   )
 );
+
+export async function getHashedEmail(email: string): Promise<bigint> {
+  try {
+    const circomArray = stringToCircomArray(email);
+    const hashedEmail = await poseidonCircom(circomArray);
+    return BigInt(hashedEmail);
+  } catch (error) {
+    console.error("Error hashing email:", error);
+    throw error; // Rethrow or handle as needed
+  }
+}
+
+export function saltEmailHash(emailHash: string, salt: string): string {
+  return emailHash + salt;
+}
