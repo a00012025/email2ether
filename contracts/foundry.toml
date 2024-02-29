@@ -5,8 +5,10 @@ libs = ["lib"]
 
 [rpc_endpoints]
 arbitrum-sepolia = "https://sepolia-rollup.arbitrum.io/rpc"
+polygon-mumbai = "https://rpc-mumbai.maticvigil.com"
 
 [etherscan]
 arbitrum-sepolia = { key = "${ARBISCAN_API_KEY}" }
+polygon-mumbai = { key = "${POLYGONSCAN_API_KEY}" }
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
