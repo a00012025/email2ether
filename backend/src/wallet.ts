@@ -41,7 +41,7 @@ if (CHAIN_ID === "42161") {
 
 export const walletClient = createWalletClient({
   account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
-  chain: arbitrumSepolia,
+  chain: network,
   transport: http(),
 });
 
@@ -86,5 +86,6 @@ export async function transferOwnership(
 
   return await emailAccount.write.transferOwnership([proof, publicSignals], {
     nonce: currentNonce++,
+    gas: 800000n,
   });
 }
