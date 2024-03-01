@@ -63,7 +63,7 @@ function MainContent({ eoaAddress, contractWalletAddress }: MainContentProps) {
         contractWalletAddress !== eoaAddress}{" "}
       {
         <div className="flex flex-1 justify-around items-center flex-col w-full h-max">
-          <MailtoLink changeAddress={contractWalletAddress} />
+          <MailtoLink changeAddress={eoaAddress} />
         </div>
       }
     </>
@@ -85,6 +85,13 @@ export default function VerifyEmail() {
         pollingInterval: 5000,
         onLogs: (logs) => {
           console.log("Event Logs", logs);
+          const transferedToAddress = logs[0]?.topics[2]?.toLowerCase();
+          const accountAddress = account?.address.toLowerCase().substring(2);
+
+          if (accountAddress && transferedToAddress?.includes(accountAddress)) {
+            console.log("Account is verified!", accountAddress);
+          }
+
           // do something when th
         },
       });
