@@ -17,6 +17,8 @@ export default function Step2() {
 
   useEffect(() => {
     if (userContractAddress && account && !userVerified) {
+      console.log("user contractAddress", userContractAddress);
+      console.log("account", account.address);
       setLoading(true);
       const unwatch = publicClient.watchEvent({
         address: userContractAddress,
@@ -29,6 +31,7 @@ export default function Step2() {
           if (accountAddress && transferedToAddress?.includes(accountAddress)) {
             setVerified(true);
             setLoading(false);
+            unwatch();
             console.log("Account is verified!", accountAddress);
           }
         },
@@ -51,7 +54,15 @@ export default function Step2() {
         Looking for your account: Verified?:{" "}
         {userVerified ? "verified" : "pending"}
       </p>
-      <div>Resend email</div>
+      {userVerified && (
+        <div>
+          <div>profile photo</div>
+          <div>address</div>
+          <div>seperator</div>
+          <div>NFT Image</div>
+          <button>Claim</button>
+        </div>
+      )}
     </div>
   );
 }
