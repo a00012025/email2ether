@@ -20,9 +20,9 @@ export default function RootLayout({
           </div>
           <div
             style={{
-              width: 600,
-              minHeight: 400,
-              backgroundColor: "rgba(255, 255, 255, 0.5)",
+              width: 800,
+              minHeight: 300,
+              backgroundColor: "rgba(255, 255, 255, 0.8)",
             }}
             className=" rounded-xl p-6 shadow-lg"
           >

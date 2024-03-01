@@ -23,12 +23,16 @@ type StoreFunctions = {
   setUserContractAddress: (address: Address) => void;
   setupNewAccount: () => Account;
   setEmail: (email: string) => void;
+  reset: () => void;
 };
 
 export const usePersistentStore = create<StoreState & StoreFunctions>()(
   persist(
     (set, get) => ({
       ...initialState,
+      reset: () => {
+        set(initialState);
+      },
       setUserVerifiedOwner: (verified: boolean) => {
         set({ userVerifiedOwner: verified });
       },
