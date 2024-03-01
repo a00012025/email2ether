@@ -4,9 +4,11 @@ import {
   getContract,
   createWalletClient,
   Chain,
+  WalletClient,
 } from "viem";
 import EmailAccountAbi from "./abi/EmailAccount";
 import {
+  sepolia,
   arbitrumSepolia,
   polygonMumbai,
   baseSepolia,
@@ -14,78 +16,105 @@ import {
 } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import EmailAccountFactoryAbi from "./abi/EmailAccountFactory";
+import { zircuitTestnet } from "./utils/zircuit";
 require("dotenv").config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const CHAIN_ID = process.env.CHAIN_ID;
-if (!PRIVATE_KEY || !CHAIN_ID) {
-  throw new Error("PRIVATE_KEY or RPC_URL or CHAIN_ID env variable is missing");
-}
-let network: Chain;
-let accountFactoryContractAddr: string;
-if (CHAIN_ID === "42161") {
-  network = arbitrumSepolia;
-  accountFactoryContractAddr = "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7";
-} else if (CHAIN_ID === "80001") {
-  network = polygonMumbai;
-  accountFactoryContractAddr = "0xD570bF4598D3ccF214E288dd92222b8Bd3134984";
-} else if (CHAIN_ID === "84532") {
-  network = baseSepolia;
-  accountFactoryContractAddr = "";
-} else if (CHAIN_ID === "59140") {
-  network = lineaTestnet;
-  accountFactoryContractAddr = "";
-} else {
-  throw new Error("Invalid CHAIN_ID");
+if (!PRIVATE_KEY) {
+  throw new Error("PRIVATE_KEY env variable is missing");
 }
 
-export const walletClient = createWalletClient({
-  account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
-  chain: network,
-  transport: http(),
-});
+const networks: { [key: string]: Chain } = {
+  "42161": arbitrumSepolia,
+  "80001": polygonMumbai,
+  // "84532": baseSepolia,
+  // "59140": lineaTestnet,
+  // "11155111": sepolia,
+  // "48899": zircuitTestnet,
+};
+const accountFactoryContractAddrs: { [key: string]: `0x${string}` } = {
+  "42161": "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7",
+  "80001": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
+  // "84532": "0x0",
+  // "59140": "0x0",
+  // "11155111": "0x0",
+  // "48899": "0x0",
+};
 
-const accountFactory = getContract({
-  address: accountFactoryContractAddr as `0x${string}`,
-  abi: EmailAccountFactoryAbi,
-  client: walletClient,
-});
-
-let currentNonce: number;
-
-export async function initWallet() {
-  const publicClient = createPublicClient({
+const walletClients: { [key: string]: WalletClient } = {};
+const accountFactories: { [key: string]: any } = {};
+for (const [chainId, network] of Object.entries(networks)) {
+  walletClients[chainId] = createWalletClient({
+    account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
     chain: network,
     transport: http(),
   });
-  currentNonce = await publicClient.getTransactionCount({
-    address: walletClient.account.address as `0x${string}`,
+  accountFactories[chainId] = getContract({
+    address: accountFactoryContractAddrs[chainId],
+    abi: EmailAccountFactoryAbi,
+    client: walletClients[chainId],
   });
+}
+const publicClients: { [key: string]: any } = {};
+const currentNonces: { [key: string]: number } = {};
+
+export async function initWallet() {
+  for (const [chainId, network] of Object.entries(networks)) {
+    publicClients[chainId] = createPublicClient({
+      chain: network,
+      transport: http(),
+    });
+    currentNonces[chainId] = await publicClients[chainId].getTransactionCount({
+      address: walletClients[chainId].account!.address as `0x${string}`,
+    });
+  }
 }
 
 export async function createEmailAccount(emailHash: string) {
-  return accountFactory.write.createAccount([BigInt(emailHash), 0n] as const, {
-    nonce: currentNonce++,
-  });
+  return Promise.all(
+    Object.keys(networks).map((chainId) => {
+      return accountFactories[chainId].write.createAccount(
+        [BigInt(emailHash), 0n] as const,
+        {
+          nonce: currentNonces[chainId]++,
+        }
+      );
+    })
+  );
 }
 
-export async function getEmailAccountAddress(emailHash: string) {
-  return accountFactory.read.getAddress([BigInt(emailHash), 0n]);
+export async function getEmailAccountAddress(emailHash: string): Promise<{
+  [ket: string]: `0x${string}`;
+}> {
+  const results = await Promise.all(
+    Object.keys(networks).map(async (chainId) => {
+      const address: `0x${string}` = await accountFactories[
+        chainId
+      ].read.getAddress([BigInt(emailHash), 0n]);
+      return { [chainId]: address };
+    })
+  );
+  return Object.assign({}, ...results);
 }
 
 export async function transferOwnership(
-  accountAddress: `0x${string}`,
+  accountAddresses: { [key: string]: `0x${string}` },
   proof: any,
   publicSignals: any
 ) {
-  const emailAccount = getContract({
-    address: accountAddress,
-    abi: EmailAccountAbi,
-    client: walletClient,
-  });
-
-  return await emailAccount.write.transferOwnership([proof, publicSignals], {
-    nonce: currentNonce++,
-    gas: 800000n,
-  });
+  return Promise.all(
+    Object.keys(networks).map((chainId) => {
+      const emailAccount = getContract({
+        address: accountAddresses[chainId],
+        abi: EmailAccountAbi,
+        client: walletClients[chainId],
+      });
+      return emailAccount.write.transferOwnership([proof, publicSignals], {
+        account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
+        chain: networks[chainId],
+        nonce: currentNonces[chainId]++,
+        gas: 800000n,
+      });
+    })
+  );
 }

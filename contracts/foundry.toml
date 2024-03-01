@@ -4,13 +4,17 @@ out = "out"
 libs = ["lib"]
 
 [rpc_endpoints]
+ethereum-sepolia = "https://rpc2.sepolia.org"
 arbitrum-sepolia = "https://sepolia-rollup.arbitrum.io/rpc"
 polygon-mumbai = "https://rpc-mumbai.maticvigil.com"
 base-sepolia = "https://sepolia.base.org"
+linea-goerli = "https://rpc.goerli.linea.build"
+zircuit-testnet = "https://zircuit1.p2pify.com/"
 
 [etherscan]
+ethereum-sepolia = { key = "${ETHERSCAN_API_KEY}" }
 arbitrum-sepolia = { key = "${ARBISCAN_API_KEY}" }
 polygon-mumbai = { key = "${POLYGONSCAN_API_KEY}" }
 base-sepolia = { key = "${BASESCAN_API_KEY}" }
-
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+linea-goerli = { key = "${LINEA_API_KEY}" }
+zircuit-testnet = { key = "${ZIRCUIT_API_KEY}" }
