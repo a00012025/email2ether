@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Roboto", "sans-serif"],
+        sans: ["Inter Tight", "sans-serif"],
       },
       colors: {
         primary: "#2563eb",

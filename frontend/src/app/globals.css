@@ -17,7 +17,7 @@ root {
 }
 
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: "Lato", sans-serif;
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
     135deg,
@@ -30,4 +30,10 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+.um-gradient-text {
+  background: -webkit-linear-gradient(var(--angle), var(--from), var(--to));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
