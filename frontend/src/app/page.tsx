@@ -30,6 +30,7 @@ const shakeAnimation = {
   transition: { type: "linear", duration: 0.4 },
 };
 
+const EMAIL_FACTORY_ADDRESS = "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7";
 export default function GetStarted() {
   const [loading, setLoading] = useState(false);
   const controls = useAnimation();
@@ -54,9 +55,8 @@ export default function GetStarted() {
 
   const { register, handleSubmit } = useForm<FormData>();
   const registerEmail = usePersistentStore((state) => state.setEmail);
-  const EMAIL_FACTORY_ADDRESS = "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7";
 
-  async function getContractAddress() {
+  async function getContractAddress(email: string) {
     if (email) {
       const hashedEmail = await getHashedEmail(email);
 
@@ -67,6 +67,8 @@ export default function GetStarted() {
         args: [hashedEmail, BigInt(0)],
       });
 
+      console.log("returns", userContractAddress);
+
       return userContractAddress;
     } else {
       console.log("No email found, please reset email");
@@ -75,15 +77,17 @@ export default function GetStarted() {
 
   // todo add error states
   const onSubmit = (data: FormData) => {
+    console.log("submits");
     if (
       data.email &&
       data.email.includes("@gmail") &&
       data.email.includes(".")
     ) {
+      console.log("data.email", data.email);
       registerEmail(data.email);
 
       setLoading(true);
-      getContractAddress()
+      getContractAddress(data.email)
         .then((address) => address && setUserContractAddress(address))
         .finally(() => {
           // wait for 3 seconds
@@ -132,6 +136,7 @@ export default function GetStarted() {
           <input
             id="email"
             type="email"
+            placeholder="Enter a valid Gmail address"
             {...register("email")}
             style={{
               width: "70%",
@@ -141,7 +146,7 @@ export default function GetStarted() {
               bottom: 0,
               border: "none",
             }}
-            className="rounded-lg text-xl  pl-6 font-bold outline-none focus:ring-2 focus:shadow-inner"
+            className="rounded-lg text-xl  pl-6 font-bold outline-none focus:ring-2 focus:shadow-inner placeholder-black placeholder:font-normal placeholder:font-mono placeholder:text-lg"
           />
           <motion.button
             whileHover={{ backgroundColor: "#1D4ED8" }}
@@ -180,6 +185,7 @@ export default function GetStarted() {
           </motion.button>
         </form>
       </motion.div>
+      <div>{userContractAddress} </div>
     </div>
   );
 }
