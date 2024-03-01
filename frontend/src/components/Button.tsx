@@ -13,11 +13,11 @@ const AnimatedButton: React.FC<AnimatedButtonProps> = ({
   children,
   onClick,
   whileHover = {
-    scale: 1.3,
+    scale: 1.1,
     transition: { duration: 0.4 },
   },
   whileTap = {
-    scale: 0.9,
+    scale: 0.95,
     transition: { duration: 0.2 },
   },
   className = "",

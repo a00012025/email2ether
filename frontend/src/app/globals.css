@@ -1,8 +1,8 @@
-@tailwind base;
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap")
+  @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
+root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 255, 200, 255;
   --background-end-rgb: 255, 220, 255;
@@ -11,15 +11,16 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 0, 0, 0;
-    --background-start-rgb: 25, 0, 25;
-    --background-end-rgb: 50, 0, 50;
+    --background-start-rgb: 0, 85, 255;
+    --background-end-rgb: 0, 153, 255;
   }
 }
 
 body {
+  font-family: "Roboto", sans-serif;
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
-    to bottom,
+    135deg,
     rgb(var(--background-start-rgb)),
     rgb(var(--background-end-rgb))
   );

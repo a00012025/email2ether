@@ -8,9 +8,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Roboto", "sans-serif"],
+      },
       colors: {
         primary: "#2563eb",
-        accent: "#f97316",
+        accent: "#f973w16",
         background: "#FFFFFF",
         "light-magenta-start": "#faccee",
         "light-magenta-end": "#f0d2dc",
@@ -23,7 +26,7 @@ const config: Config = {
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+          "conic-gradient(from 135deg at 50% 50%, var(--tw-gradient-stops))",
       },
     },
   },
