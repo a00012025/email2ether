@@ -50,6 +50,9 @@ function MailtoLink({
   onEmailSent: () => void;
   onClicked: () => void;
 }) {
+  const setEmailRecieved = usePersistentStore(
+    (state) => state.setEmailRecieved
+  );
   const getHashedEmail = usePersistentStore((state) => state.getHashedEmail);
   const hashedEmail = getHashedEmail();
   const [polling, setPolling] = useState(false);
@@ -76,6 +79,8 @@ function MailtoLink({
     if (accountStatus?.processing === true) {
       onEmailSent();
       setPolling(false);
+      setButtonTitle("Email recieved!");
+      setEmailRecieved(true);
     }
   }, [accountStatus?.processing]);
 
@@ -87,10 +92,6 @@ function MailtoLink({
     setPolling(true);
     onClicked();
     setButtonTitle("Waiting for email");
-
-    setTimeout(() => {
-      setButtonTitle("Try again?");
-    }, 50000); // 50 seconds
   };
 
   return (

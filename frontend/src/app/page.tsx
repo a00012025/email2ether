@@ -10,6 +10,7 @@ import EmailAccountFactoryAbi from "@/constants/EmailAccountFactoryAbi";
 import dotAnimation from "@/constants/dots.json";
 import downArrowAnimation from "@/constants/downArrow.json";
 import ethWalletAnimation from "@/constants/ethWallet.json";
+import greenSuccessAnimation from "@/constants/greenSuccess.json";
 import loadingBlockchainAnimation from "@/constants/loadingBlockchain.json";
 import pinkEmailAnimation from "@/constants/pinkEmail.json";
 import profileAnimation from "@/constants/profile.json";
@@ -17,7 +18,7 @@ import sendAnimation from "@/constants/send.json";
 import { useChangeOwner } from "@/hooks/useChangeOwner";
 import { publicClient } from "@/lib/wallet";
 import { getHashedEmail, usePersistentStore } from "@/store/persistent";
-import { motion, useAnimation } from "framer-motion";
+import { AnimatePresence, motion, useAnimation } from "framer-motion";
 import LottiePlayer from "lottie-react";
 import Image from "next/image";
 import { Ref, useEffect, useRef, useState } from "react";
@@ -120,10 +121,14 @@ export default function HomePage() {
 
   const pinkEmailRef = useRef(null);
 
+  const emailRecieved = usePersistentStore((state) => state.emailRecieved);
+
   const [loading, setLoading] = useState(false);
   const controls = useAnimation();
-  const { loading: loadingChangeOwner, changeOwner } = useChangeOwner(() => {
-    section4.current?.scrollIntoView({ behavior: "smooth" });
+  const { loading: loadingChangeOwner, changeOwner } = useChangeOwner({
+    onOwnerChanged: () => {
+      section4.current?.scrollIntoView({ behavior: "smooth" });
+    },
   });
   const [showSection1Arrow, setShowSection1Arrow] = useState(false);
 
@@ -375,19 +380,32 @@ export default function HomePage() {
                 Only YOUR email address can claim this address
               </p>
             </div>
-            <motion.div className="flex justify-center">
-              <LottiePlayer
-                animationData={pinkEmailAnimation}
-                autoplay={false}
-                lottieRef={pinkEmailRef}
-                style={{ height: "400px", width: "500px" }}
-              />
-            </motion.div>
+            <AnimatePresence>
+              {emailRecieved ? (
+                <motion.div className="flex justify-center">
+                  <LottiePlayer
+                    animationData={greenSuccessAnimation}
+                    autoplay={true}
+                    loop={false}
+                    style={{ height: "400px", width: "500px" }}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div className="flex justify-center">
+                  <LottiePlayer
+                    animationData={pinkEmailAnimation}
+                    autoplay={false}
+                    lottieRef={pinkEmailRef}
+                    style={{ height: "400px", width: "500px" }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
             <motion.div
               className="flex justify-center mt-3"
               style={{ width: "200px" }}
             >
-              {account && account.address && (
+              {!emailRecieved && account && account.address && (
                 <MailtoLink
                   onClicked={() => {
                     pinkEmailRef.current?.play();
@@ -395,7 +413,10 @@ export default function HomePage() {
                   changeAddress={account.address}
                   onEmailSent={() => {
                     changeOwner();
-                    section3.current?.scrollIntoView({ behavior: "smooth" });
+                    pinkEmailRef.current?.stop();
+                    setTimeout(() => {
+                      section3.current?.scrollIntoView({ behavior: "smooth" });
+                    }, 3000);
                   }}
                 />
               )}

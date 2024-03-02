@@ -10,6 +10,7 @@ interface StoreState {
   account: Account | null;
   email: string | null;
   hashedEmail: string | null;
+  emailRecieved: boolean;
 }
 
 const initialState: StoreState = {
@@ -18,9 +19,11 @@ const initialState: StoreState = {
   account: null,
   email: null,
   hashedEmail: null,
+  emailRecieved: false,
 };
 
 type StoreFunctions = {
+  setEmailRecieved: (recieved: boolean) => void;
   setUserVerifiedOwner: (verified: boolean) => void;
   setUserContractAddress: (address: Address) => void;
   setupNewAccount: () => Account;
@@ -34,6 +37,9 @@ export const usePersistentStore = create<StoreState & StoreFunctions>()(
   persist(
     (set, get) => ({
       ...initialState,
+      setEmailRecieved: (recieved: boolean) => {
+        set({ emailRecieved: recieved });
+      },
       reset: () => {
         set(initialState);
       },
