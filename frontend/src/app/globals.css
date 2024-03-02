@@ -15,10 +15,14 @@ root {
     --background-end-rgb: 0, 153, 255;
   }
 }
+p {
+  letter-spacing: -0.5;
+}
 
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(to bottom, #f9f9f9 0%, #ffffff 100%);
+  letter-spacing: -0.5;
 }
 
 @layer utilities {

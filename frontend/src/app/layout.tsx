@@ -1,11 +1,25 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Inter } from "next/font/google";
+import { Inter, Lato, Roboto } from "next/font/google";
 import "./globals.css";
 
 const queryClient = new QueryClient();
 
 const inter = Inter({
+  weight: ["100", "200", "400", "500", "600", "700", "800", "900"],
+  style: ["normal"],
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const lato = Lato({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const roboto = Roboto({
   weight: ["400", "700"],
   subsets: ["latin"],
   display: "swap",

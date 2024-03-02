@@ -352,14 +352,9 @@ export default function HomePage() {
       >
         {userHashedEmail && (
           <>
-            <motion.div className="px-12 tm-2">
+            <motion.div className="px-12 tm-2" style={{ translateY: 30 }}>
               <BigText>Let's Claim it by Sending an Email!</BigText>
             </motion.div>
-            <div>
-              <p className="italic text-sm">
-                Only YOUR email address can claim this address
-              </p>
-            </div>
             <AnimatePresence>
               {emailRecieved ? (
                 <motion.div className="flex justify-center" key="sec2-1">
@@ -420,14 +415,17 @@ export default function HomePage() {
         <motion.div className="flex items-center flex-col px-12 tm-2 relative">
           <AnimatePresence>
             {loadingChangeOwner && !userVerifiedOwner && (
-              <motion.div key="sec3-1">
-                <BigText>Connecting You to Your Wallet</BigText>
+              <motion.div className="flex flex-col justify-around" key="sec3-1">
+                <motion.div style={{ translateY: 120 }}>
+                  <BigText>Connecting You to Your Wallet</BigText>
+                </motion.div>
                 <LottiePlayer
+                  style={{ marginBottom: "100px" }}
                   animationData={loadingBlockchainAnimation}
                   autoplay={true}
                 />
                 <motion.div
-                  style={{ bottom: 20 }}
+                  style={{ bottom: 20, translateY: -135 }}
                   className="flex flex-1 mx-56"
                 >
                   <ProgressBar />
@@ -435,7 +433,7 @@ export default function HomePage() {
               </motion.div>
             )}
             {!loadingChangeOwner && userVerifiedOwner && (
-              <motion.div key="sec3-2">
+              <motion.div className="flex flex-col items-center" key="sec3-2">
                 <BigText>Yay! You're Connected!</BigText>
                 <LottiePlayer
                   animationData={greenSuccessAnimation}
