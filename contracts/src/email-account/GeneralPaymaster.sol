@@ -26,59 +26,7 @@ contract GeneralPaymaster is BasePaymaster {
 
     uint256 private constant SIGNATURE_OFFSET = 84;
 
-    constructor(
-        IEntryPoint _entryPoint,
-        address _verifyingSigner
-    ) BasePaymaster(_entryPoint) Ownable() {
-        verifyingSigner = _verifyingSigner;
-    }
-
-    mapping(address => uint256) public senderNonce;
-
-    function pack(
-        UserOperation calldata userOp
-    ) internal pure returns (bytes memory ret) {
-        // lighter signature scheme. must match UserOp.ts#packUserOp
-        bytes calldata pnd = userOp.paymasterAndData;
-        // copy directly the userOp from calldata up to (but not including) the paymasterAndData.
-        // this encoding depends on the ABI encoding of calldata, but is much lighter to copy
-        // than referencing each field separately.
-        assembly {
-            let ofs := userOp
-            let len := sub(sub(pnd.offset, ofs), 32)
-            ret := mload(0x40)
-            mstore(0x40, add(ret, add(len, 32)))
-            mstore(ret, len)
-            calldatacopy(add(ret, 32), ofs, len)
-        }
-    }
-
-    /**
-     * return the hash we're going to sign off-chain (and validate on-chain)
-     * this method is called by the off-chain service, to sign the request.
-     * it is called on-chain from the validatePaymasterUserOp, to validate the signature.
-     * note that this signature covers all fields of the UserOperation, except the "paymasterAndData",
-     * which will carry the signature itself.
-     */
-    function getHash(
-        UserOperation calldata userOp,
-        uint48 validUntil,
-        uint48 validAfter
-    ) public view returns (bytes32) {
-        //can't use userOp.hash(), since it contains also the paymasterAndData itself.
-
-        return
-            keccak256(
-                abi.encode(
-                    pack(userOp),
-                    block.chainid,
-                    address(this),
-                    senderNonce[userOp.getSender()],
-                    validUntil,
-                    validAfter
-                )
-            );
-    }
+    constructor(IEntryPoint _entryPoint) BasePaymaster(_entryPoint) Ownable() {}
 
     /**
      * verify our external signer signed this request.
@@ -88,49 +36,15 @@ contract GeneralPaymaster is BasePaymaster {
      * paymasterAndData[84:] : signature
      */
     function _validatePaymasterUserOp(
-        UserOperation calldata userOp,
+        UserOperation calldata /* userOp */,
         bytes32 /*userOpHash*/,
         uint256 requiredPreFund
     ) internal override returns (bytes memory context, uint256 validationData) {
         (requiredPreFund);
-
-        (
-            uint48 validUntil,
-            uint48 validAfter,
-            bytes calldata signature
-        ) = parsePaymasterAndData(userOp.paymasterAndData);
-        //ECDSA library supports both 64 and 65-byte long signatures.
-        // we only "require" it here so that the revert reason on invalid signature will be of "VerifyingPaymaster", and not "ECDSA"
-        require(
-            signature.length == 64 || signature.length == 65,
-            "VerifyingPaymaster: invalid signature length in paymasterAndData"
-        );
-        bytes32 hash = ECDSA.toEthSignedMessageHash(
-            getHash(userOp, validUntil, validAfter)
-        );
-        senderNonce[userOp.getSender()]++;
-
-        //don't revert on signature failure: return SIG_VALIDATION_FAILED
-        if (verifyingSigner != ECDSA.recover(hash, signature)) {
-            return ("", _packValidationData(true, validUntil, validAfter));
-        }
-
         //no need for other on-chain validation: entire UserOp should have been checked
         // by the external service prior to signing it.
+        uint48 validUntil = 0xffffffffffff;
+        uint48 validAfter = 0;
         return ("", _packValidationData(false, validUntil, validAfter));
-    }
-
-    function parsePaymasterAndData(
-        bytes calldata paymasterAndData
-    )
-        public
-        pure
-        returns (uint48 validUntil, uint48 validAfter, bytes calldata signature)
-    {
-        (validUntil, validAfter) = abi.decode(
-            paymasterAndData[VALID_TIMESTAMP_OFFSET:SIGNATURE_OFFSET],
-            (uint48, uint48)
-        );
-        signature = paymasterAndData[SIGNATURE_OFFSET:];
     }
 }
