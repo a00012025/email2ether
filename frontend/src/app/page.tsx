@@ -25,6 +25,12 @@ import { Ref, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import Lottie from "react-lottie";
 
+function formatEthAddress(address: string) {
+  if (!address) return "";
+  const start = address.slice(0, 5);
+  const end = address.slice(-4);
+  return `${start}...${end}`;
+}
 interface FormData {
   email: string;
 }
@@ -89,6 +95,7 @@ const sendOptions = {
 
 const EMAIL_FACTORY_ADDRESS = "0x2ECC385Af1fb4C7b2f37ad0295e603ed619B7C70";
 export default function HomePage() {
+  const [nftIndex, setNftIndex] = useState(0);
   const section1 = useRef<Ref<HTMLDivElement>>(null);
   const section2 = useRef<Ref<HTMLDivElement>>(null);
   const section3 = useRef<Ref<HTMLDivElement>>(null);
@@ -346,7 +353,6 @@ export default function HomePage() {
         id="section-2"
         ref={section2}
         initial="visible"
-        // animate={userContractAddress && !loading ? "visible" : "hidden"}
         variants={sectionVariants}
         className="section"
       >
@@ -446,31 +452,50 @@ export default function HomePage() {
           </AnimatePresence>
         </motion.div>
       </motion.div>
-      <motion.div
-        ref={section4}
-        id="section-4"
-        className="section justify-start"
-        style={{ marginBottom: "48px", justifyContent: "start" }}
-      >
+      <motion.div ref={section4} id="section-4" className="section">
         {userVerifiedOwner && (
           <>
-            <BigText>That was Awesome!</BigText>
-            <p className="text-center px-32 m-0 pt-6">
-              Try out your new wallet by minting a free NFT below
-            </p>
-            <p className="text-center text-sm px-32 m-0">
-              (Don't worry, we'll pay all the fees!)
-            </p>
-            <motion.div className="flex justify-center  flex-col mb-10">
-              <Lottie options={profileOptions} height={200} width={200} />
-              <motion.div className="text-center">
-                <p className="text-gray-800 m-0 font-bold shadow rounded-2xl p-3 ">
-                  {userContractAddress} sadfsdf
-                </p>
-              </motion.div>
+            <motion.div>
+              <BigText>That was Awesome!</BigText>
+              <p className="text-center px-32 m-0 pt-6">
+                Try out your new wallet by minting a free NFT below
+              </p>
+              <p className="text-center text-sm px-32 m-0">
+                (Don't worry, we'll pay all the fees!)
+              </p>
             </motion.div>
 
-            <NFTStack />
+            <motion.div
+              className="flex flex-1  justify-between relative"
+              style={{ width: "800px" }}
+            >
+              <motion.div
+                className="flex flex-col"
+                style={{ marginLeft: "100px" }}
+              >
+                <LottiePlayer
+                  animationData={profileAnimation}
+                  style={{ width: "200px", height: "200px" }}
+                />
+                <motion.div className="text-center">
+                  <p className="text-gray-800 m-0 font-bold shadow rounded-2xl p-3 ">
+                    {formatEthAddress(userContractAddress as string)}
+                    {formatEthAddress(
+                      "0xj4534j345k325234jl345lkj345345jk43k5245"
+                    )}
+                  </p>
+                </motion.div>
+                <motion.div className="flex font-bold mt-20 flex-1 justify-center">
+                  No NFT's, Mint One!
+                </motion.div>
+              </motion.div>
+              <motion.div
+                className="absolute"
+                style={{ bottom: 400, right: 20 }}
+              >
+                <NFTStack selectedNftIndex={(index) => setNftIndex(index)} />
+              </motion.div>
+            </motion.div>
           </>
         )}
       </motion.div>{" "}

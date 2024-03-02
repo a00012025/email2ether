@@ -1,13 +1,15 @@
+import mintAnimation from "@/constants/mintLoading.json";
 import {
   generateNftMintingCalldata,
   generateUserOps,
   signUserOps,
 } from "@/lib/userOps";
 import { usePersistentStore } from "@/store/persistent";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import move from "lodash-move";
+import LottiePlayer from "lottie-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import nft0 from "@/nfts/0.webp";
 import nft1 from "@/nfts/1.webp";
@@ -72,8 +74,16 @@ const CARDS = [
   },
 ];
 
-const NFTStack = () => {
+interface NFTStack {
+  selectedNftIndex: (index: number) => void;
+}
+
+const NFTStack = ({ selectedNftIndex }: NFTStack) => {
   const [cards, setCards] = useState(CARDS);
+  const [minting, setMinting] = useState<number | null>(null);
+  const controls = useAnimation();
+  const [txHash, setTxHash] = useState();
+  const [mintedNft, setMintedNft] = useState<number | null>(null);
 
   const [userContractAddress, userSessionAccount] = usePersistentStore(
     (state) => [state.userContractAddress, state.account]
@@ -100,10 +110,22 @@ const NFTStack = () => {
     },
   });
 
-  const handleClick = async (imgIdx: number) => {
-    if (!userContractAddress || !userSessionAccount) return;
+  useEffect(() => {
+    if (data) {
+      console.log("mint data", data);
+      setTxHash(data.tx_hash);
+      setMintedNft(minting);
+      setMinting(null);
+    }
+  }, [data?.tx_hash]);
 
-    console.log("Minting NFT...");
+  const handleClick = async (imgIdx: number) => {
+    console.log("begine click");
+    if (!userContractAddress || !userSessionAccount) return;
+    console.log("after the return");
+
+    setMinting(imgIdx);
+    console.log("Minting NFT...", imgIdx);
     console.log("User contract address: ", userContractAddress);
     console.log("Image index: ", imgIdx);
     // Implement minting logic here
@@ -140,11 +162,16 @@ const NFTStack = () => {
                 ...cardStyle,
                 backgroundImage: `url(${nft.image})`,
                 cursor: canDrag ? "grab" : "auto",
+                translateX: index === mintedNft ? -400 : 0,
               }}
               animate={{
                 top: index * -CARD_OFFSET,
                 scale: 1 - index * SCALE_FACTOR,
                 zIndex: CARD_COLORS.length - index,
+              }}
+              onDragStart={(e) => {
+                console.log("dragging start");
+                selectedNftIndex(index);
               }}
               drag={canDrag ? "y" : false}
               dragConstraints={{
@@ -166,7 +193,9 @@ const NFTStack = () => {
                   width={350}
                   height={220}
                   layout="responsive"
-                  onDragStart={(e) => e.preventDefault()}
+                  onDragStart={(e) => {
+                    e.preventDefault();
+                  }}
                   className="w-full h-auto"
                 />
                 <div className="px-6 py-4">
@@ -191,7 +220,17 @@ const NFTStack = () => {
                     }}
                     onClick={() => handleClick(nft.idx)}
                   >
-                    Mint
+                    {minting === nft.idx && (
+                      <>
+                        <LottiePlayer
+                          animationData={mintAnimation}
+                          style={{ width: "20px", height: "20px" }}
+                        />
+                      </>
+                    )}
+                    {mintedNft !== nft.idx && minting !== nft.idx ? (
+                      <>Mint</>
+                    ) : null}
                   </motion.button>
                 </div>
               </motion.div>
