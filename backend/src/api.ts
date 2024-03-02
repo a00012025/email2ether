@@ -3,6 +3,10 @@ import express from "express";
 
 // Create a new express application instance
 const app: express.Application = express();
+app.use(function (_req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  next();
+});
 app.get("/account", (req, res) => {
   const emailHash = req.query.email_hash;
   if (!emailHash) {

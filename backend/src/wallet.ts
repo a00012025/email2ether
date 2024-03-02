@@ -1,3 +1,4 @@
+import { UserOperation } from "./../../contracts/lib/account-abstraction/test/UserOperation";
 import {
   createPublicClient,
   http,
@@ -19,25 +20,29 @@ import { zircuitTestnet } from "./utils/zircuit";
 import { privateKeyToAccount } from "viem/accounts";
 import EmailAccountFactoryAbi from "./abi/EmailAccountFactory";
 import EntryPointAbi from "./abi/EntryPoint";
+import { getUserOpHash } from "@account-abstraction/utils";
+
 require("dotenv").config();
 
+const ENTRYPOINT_ADDRESS = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 if (!PRIVATE_KEY) {
   throw new Error("PRIVATE_KEY env variable is missing");
 }
 
 const networks: { [key: string]: Chain } = {
-  "42161": arbitrumSepolia,
-  "80001": polygonMumbai,
-  "84532": baseSepolia,
+  "421614": arbitrumSepolia,
+  // "80001": polygonMumbai,
+  // "84532": baseSepolia,
   // "59140": lineaTestnet,
   // "11155111": sepolia,
   // "48899": zircuitTestnet,
 };
 const accountFactoryContractAddrs: { [key: string]: `0x${string}` } = {
-  "42161": "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7",
-  "80001": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
-  "84532": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
+  // "421614": "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7",
+  "421614": "0xaEB3816628ecE25adCD2b0762753065c1277a95D",
+  // "80001": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
+  // "84532": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
   // "59140": "0x0",
   // "11155111": "0x0",
   // "48899": "0x0",
@@ -57,7 +62,7 @@ for (const [chainId, network] of Object.entries(networks)) {
     client: walletClients[chainId],
   });
 }
-const walletAddress = walletClients["42161"].account!.address as `0x${string}`;
+const walletAddress = walletClients["421614"].account!.address as `0x${string}`;
 const publicClients: { [key: string]: any } = {};
 const currentNonces: { [key: string]: number } = {};
 
@@ -85,6 +90,9 @@ export async function createEmailAccount(emailHash: string) {
             }
           );
         } catch (error: unknown) {
+          if (error instanceof TransactionExecutionError) {
+            console.log("No!!", error.details);
+          }
           if (
             error instanceof TransactionExecutionError &&
             error.details.includes("nonce too low")
@@ -144,6 +152,9 @@ export async function transferOwnership(
             gas: 800000n,
           });
         } catch (error: unknown) {
+          if (error instanceof TransactionExecutionError) {
+            console.log("No!! 2", error.details);
+          }
           if (
             error instanceof TransactionExecutionError &&
             error.details.includes("nonce too low")
@@ -169,34 +180,45 @@ export async function transferOwnership(
 
 export async function handleOps(chainId: string) {
   const entryPoint = getContract({
-    address: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+    address: ENTRYPOINT_ADDRESS,
     abi: EntryPointAbi,
     client: walletClients[chainId]!,
   });
-  return entryPoint.write.handleOps(
-    [
-      [
-        {
-          sender: "0x219d4f0301A75Ff2bA4D61a64aE67e58027d7721",
-          nonce: 0n,
-          initCode: "0x0",
-          callData: "0x313233",
-          callGasLimit: 50000n,
-          verificationGasLimit: 50000n,
-          preVerificationGas: 50000n,
-          maxFeePerGas: BigInt(4e9),
-          maxPriorityFeePerGas: BigInt(4e9),
-          paymasterAndData: "0x",
-          signature: "0x1234",
-        },
-      ],
-      walletAddress,
-    ],
-    {
-      account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
-      chain: networks[chainId],
-      nonce: currentNonces[chainId]++,
-      gas: 500000n,
-    }
+  const userOp = {
+    sender: "0xD188Ed79C8312A40bc0ea9FD482964c04D2A7837" as const,
+    nonce: 0n,
+    initCode: "0x" as const,
+    callData:
+      "0xb61d27f60000000000000000000000000000007eabfc2e6a6b33b21d2f73d58941bab574000000000000000000000000000000000000000000000000000000003b9aca0000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000" as const,
+    callGasLimit: 50000n,
+    verificationGasLimit: 200000n,
+    preVerificationGas: 200000n,
+    maxFeePerGas: BigInt(2e8),
+    maxPriorityFeePerGas: BigInt(2e8),
+    paymasterAndData: "0x" as const,
+    signature: "0x" as `0x${string}`,
+  };
+
+  const userOpHash = getUserOpHash(
+    userOp,
+    ENTRYPOINT_ADDRESS,
+    Number.parseInt(chainId)
   );
+  console.log("userOpHash", userOpHash);
+  userOp.signature = (await privateKeyToAccount(
+    PRIVATE_KEY as `0x${string}`
+  ).signMessage({
+    message: {
+      raw: userOpHash as `0x${string}`,
+    },
+  })) as `0x${string}`;
+  console.log("Full user op:", userOp);
+  return entryPoint.write.handleOps([[userOp], walletAddress], {
+    account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
+    chain: networks[chainId],
+    nonce: currentNonces[chainId]++,
+    gas: 800000n,
+    maxFeePerGas: BigInt(2e8),
+    maxPriorityFeePerGas: BigInt(2e8),
+  });
 }
