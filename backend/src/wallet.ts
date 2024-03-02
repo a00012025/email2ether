@@ -79,40 +79,44 @@ export async function initWallet() {
 }
 
 export async function createEmailAccount(emailHash: string) {
-  return Promise.all(
-    Object.keys(networks).map(async (chainId) => {
-      let sentNonce = 0;
-      for (let i = 0; i < 3; i++) {
-        try {
-          sentNonce = currentNonces[chainId];
-          const result = await accountFactories[chainId].write.createAccount(
-            [BigInt(emailHash), 0n] as const,
-            {
-              nonce: currentNonces[chainId]++,
-            }
+  const results: { [key: string]: string } = {};
+  for (const chainId of Object.keys(networks)) {
+    for (let i = 0; i < 3; i++) {
+      try {
+        const result = await accountFactories[chainId].write.createAccount(
+          [BigInt(emailHash), 0n] as const,
+          {
+            nonce: currentNonces[chainId]++,
+          }
+        );
+        results[chainId] = result;
+        break;
+      } catch (error: unknown) {
+        if (
+          error instanceof TransactionExecutionError &&
+          error.details.includes("nonce too low")
+        ) {
+          console.log(
+            "Caught nonce too low error in create email acc. Retrying..."
           );
-          return result;
-        } catch (error: unknown) {
-          console.log("Caught error in create email acc:", error);
           currentNonces[chainId] = await publicClients[
             chainId
           ].getTransactionCount({
             address: walletAddress,
           });
-          if (sentNonce != currentNonces[chainId]) {
-            // nonce too low
-            console.log(
-              `nonce too low for ${chainId}. Retrying createEmailAccount`
-            );
-            continue;
-          } else {
-            throw error;
+          if (i === 2) {
+            throw new Error("Failed to create email account after 3 retries");
           }
+          continue;
+        } else {
+          // unknown error
+          console.log("Caught unknown error in create email acc!", error);
+          throw error;
         }
       }
-      throw new Error("Failed to create email account after 3 retries");
-    })
-  );
+    }
+  }
+  return results;
 }
 
 export async function getEmailAccountAddress(emailHash: string): Promise<{
@@ -134,43 +138,73 @@ export async function transferOwnership(
   proof: any,
   publicSignals: any
 ) {
-  return Promise.all(
-    Object.keys(networks).map(async (chainId) => {
-      const emailAccount = getContract({
-        address: accountAddresses[chainId],
-        abi: EmailAccountAbi,
-        client: walletClients[chainId],
-      });
-      for (let i = 0; i < 3; i++) {
-        let sentNonce = currentNonces[chainId];
-        try {
-          return emailAccount.write.transferOwnership([proof, publicSignals], {
+  const results: { [key: string]: string } = {};
+  for (const chainId of Object.keys(networks)) {
+    const emailAccount = getContract({
+      address: accountAddresses[chainId],
+      abi: EmailAccountAbi,
+      client: walletClients[chainId],
+    });
+    for (let i = 0; i < 3; i++) {
+      try {
+        const result = await emailAccount.write.transferOwnership(
+          [proof, publicSignals],
+          {
             account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
             chain: networks[chainId],
             nonce: currentNonces[chainId]++,
             gas: 800000n,
-          });
-        } catch (error: unknown) {
-          console.log("Caught error in transfer ownership:", error);
+          }
+        );
+        results[chainId] = result;
+        break;
+      } catch (error: unknown) {
+        if (
+          error instanceof TransactionExecutionError &&
+          error.details.includes("nonce too low")
+        ) {
+          console.log(
+            "Caught nonce too low error in transfer ownership. Retrying..."
+          );
           currentNonces[chainId] = await publicClients[
             chainId
           ].getTransactionCount({
             address: walletAddress,
           });
-          if (sentNonce != currentNonces[chainId]) {
-            // nonce too low
-            console.log(
-              `nonce too low for ${chainId}. Retrying transferOwnership`
-            );
-            continue;
-          } else {
-            throw error;
+          if (i === 2) {
+            throw new Error("Failed to transfer ownership after 3 retries");
           }
+          continue;
+        } else {
+          // unknown error
+          console.log("Caught unknown error in create email acc!", error);
+          throw error;
         }
       }
-      throw new Error("Failed to transfer ownership after 3 retries");
-    })
-  );
+    }
+  }
+  return results;
+}
+
+export async function handleOpsRaw(
+  userOp: any,
+  chainId: string
+): Promise<string> {
+  const entryPoint = getContract({
+    address: ENTRYPOINT_ADDRESS,
+    abi: EntryPointAbi,
+    client: walletClients[chainId]!,
+  });
+
+  console.log("Full user op:", userOp);
+  return entryPoint.write.handleOps([[userOp], walletAddress], {
+    account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
+    chain: networks[chainId],
+    nonce: currentNonces[chainId]++,
+    gas: 800000n,
+    maxFeePerGas: BigInt(2e8),
+    maxPriorityFeePerGas: BigInt(2e8),
+  });
 }
 
 export async function handleOps(chainId: string) {
@@ -181,13 +215,13 @@ export async function handleOps(chainId: string) {
   });
   const userOp = {
     sender: "0x3730a6137887C55D6D1871A91500a64EF649F8B7" as const,
-    nonce: 1n,
+    nonce: 2n,
     initCode: "0x" as const,
     callData:
       "0xb61d27f60000000000000000000000000000007eabfc2e6a6b33b21d2f73d58941bab574000000000000000000000000000000000000000000000000000000003b9aca0000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000" as const,
     callGasLimit: 50000n,
-    verificationGasLimit: 200000n,
-    preVerificationGas: 200000n,
+    verificationGasLimit: 100000n,
+    preVerificationGas: 100000n,
     maxFeePerGas: BigInt(2e8),
     maxPriorityFeePerGas: BigInt(2e8),
     paymasterAndData: "0xFB0AD3C188DC1D3D490C4e00aBF261Aa5613a25b" as const,
