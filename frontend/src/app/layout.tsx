@@ -1,8 +1,11 @@
 "use client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Inter } from "next/font/google";
 import Image from "next/image";
 import logo from "../../public/logo.png";
 import "./globals.css";
+
+const queryClient = new QueryClient();
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,7 +29,9 @@ export default function RootLayout({
             }}
             // className=" rounded-xl p-6 shadow-lg"
           >
-            {children}
+            <QueryClientProvider client={queryClient}>
+              {children}
+            </QueryClientProvider>
           </div>
         </main>
       </body>

@@ -19,11 +19,6 @@ root {
 body {
   font-family: "Lato", sans-serif;
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-    135deg,
-    rgb(var(--background-start-rgb)),
-    rgb(var(--background-end-rgb))
-  );
 }
 
 @layer utilities {

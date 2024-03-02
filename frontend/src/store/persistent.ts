@@ -9,6 +9,7 @@ interface StoreState {
   userContractAddress: Address | null;
   account: Account | null;
   email: string | null;
+  hashedEmail: string | null;
 }
 
 const initialState: StoreState = {
@@ -16,6 +17,7 @@ const initialState: StoreState = {
   userContractAddress: null,
   account: null,
   email: null,
+  hashedEmail: null,
 };
 
 type StoreFunctions = {
@@ -23,6 +25,8 @@ type StoreFunctions = {
   setUserContractAddress: (address: Address) => void;
   setupNewAccount: () => Account;
   setEmail: (email: string) => void;
+  setHashedEmail: (email: bigint) => void;
+  getHashedEmail: () => bigint;
   reset: () => void;
 };
 
@@ -48,6 +52,12 @@ export const usePersistentStore = create<StoreState & StoreFunctions>()(
       },
       setEmail: (email: string) => {
         set({ email });
+      },
+      setHashedEmail: (hashedEmail: bigint) => {
+        set({ hashedEmail: hashedEmail.toString() });
+      },
+      getHashedEmail: () => {
+        return BigInt(get().hashedEmail || "0");
       },
     }),
     {

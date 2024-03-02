@@ -12,6 +12,7 @@ export default function BigText({ children, props }: BigTextProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       style={{
+        margin: 0,
         fontSize: 64,
         fontWeight: "bold",
         letterSpacing: "-2.5px",
