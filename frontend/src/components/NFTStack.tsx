@@ -9,7 +9,7 @@ import { motion, useAnimation } from "framer-motion";
 import move from "lodash-move";
 import LottiePlayer from "lottie-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import nft0 from "@/nfts/0.webp";
 import nft1 from "@/nfts/1.webp";
@@ -101,23 +101,22 @@ const NFTStack = ({ selectedNftIndex }: NFTStack) => {
         `https://sensible-sparrow-admittedly.ngrok-free.app/send_user_op`,
         {
           method: "POST",
-          body: JSON.stringify(signedUserOp),
+          body: JSON.stringify(signedUserOp, (_, v) =>
+            typeof v === "bigint" ? v.toString() : v
+          ),
           headers: {
             "Content-Type": "application/json",
           },
         }
       ).then((res) => res.json());
     },
-  });
-
-  useEffect(() => {
-    if (data) {
-      console.log("mint data", data);
+    onSuccess(data) {
+      console.log("Minted NFT", data);
       setTxHash(data.tx_hash);
       setMintedNft(minting);
       setMinting(null);
-    }
-  }, [data?.tx_hash]);
+    },
+  });
 
   const handleClick = async (imgIdx: number) => {
     console.log("begine click");
