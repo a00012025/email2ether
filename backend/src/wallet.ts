@@ -196,14 +196,43 @@ export async function handleOpsRaw(
   });
 
   console.log("Full user op:", userOp);
-  return entryPoint.write.handleOps([[userOp], walletAddress], {
-    account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
-    chain: networks[chainId],
-    nonce: currentNonces[chainId]++,
-    gas: 800000n,
-    maxFeePerGas: BigInt(2e8),
-    maxPriorityFeePerGas: BigInt(2e8),
-  });
+  for (let i = 0; i < 3; i++) {
+    try {
+      const txHash = await entryPoint.write.handleOps(
+        [[userOp], walletAddress],
+        {
+          account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
+          chain: networks[chainId],
+          nonce: currentNonces[chainId]++,
+          gas: 800000n,
+          maxFeePerGas: BigInt(2e8),
+          maxPriorityFeePerGas: BigInt(2e8),
+        }
+      );
+      return txHash;
+    } catch (error: unknown) {
+      if (
+        error instanceof TransactionExecutionError &&
+        error.details.includes("nonce too low")
+      ) {
+        console.log("Caught nonce too low error. Retrying...");
+        currentNonces[chainId] = await publicClients[
+          chainId
+        ].getTransactionCount({
+          address: walletAddress,
+        });
+        if (i === 2) {
+          throw new Error("Failed to handle ops after 3 retries");
+        }
+        continue;
+      } else {
+        // unknown error
+        console.log("Caught unknown error!", error);
+        throw error;
+      }
+    }
+  }
+  throw new Error("Failed!");
 }
 
 export async function handleOps(chainId: string) {
