@@ -2,15 +2,14 @@
 pragma solidity ^0.8.12;
 
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
 
-contract DemoDenverNft is ERC721 {
+contract DemoDenverNft is ERC721, Ownable{
     using Strings for uint256;
     string public baseURI;
     uint256 _nextTokenId;
 
-    constructor(string memory anBaseURI) ERC721('Email2Ether Denver', 'E2E-DENVER') {
-        baseURI = anBaseURI;
-    }
+    constructor(address initialOwner) ERC721('Email2Ether Denver', 'E2E-DENVER') Ownable(initialOwner) {}
 
     mapping(address => bool) public hasMinted;
     mapping(uint256 => uint256) public tokenIdToImgIdx;
@@ -30,11 +29,15 @@ contract DemoDenverNft is ERC721 {
         return baseURI; 
     }
 
+    function setBaseURI(string memory anbaseURI) public onlyOwner {
+        baseURI = anbaseURI;
+    }
+
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         _requireOwned(tokenId);
 
         uint256 imgIdx = tokenIdToImgIdx[tokenId];
 
-        return string.concat(baseURI, imgIdx.toString());
+        return bytes(baseURI).length > 0 ? string.concat(baseURI, imgIdx.toString()) : "";
     }
 }

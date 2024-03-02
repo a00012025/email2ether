@@ -8,9 +8,9 @@ contract Deployer is Script {
     function run() external {
         vm.startBroadcast();
         
-        DemoDenverNft nft = new DemoDenverNft();
+        DemoDenverNft nft = new DemoDenverNft(0xd24eF9076De2b69A51F54042831403651D3ac980);
         console.log("NFT address: ", address(nft));
-        
+
         vm.stopBroadcast();
     }
 }
