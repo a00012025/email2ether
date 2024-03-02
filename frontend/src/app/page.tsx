@@ -486,7 +486,7 @@ export default function HomePage() {
                   </p>
                 </motion.div>
                 <motion.div className="flex font-bold mt-20 flex-1 justify-center">
-                  No NFT's, Mint One!
+                  No NFTs, Mint One!
                 </motion.div>
               </motion.div>
               <motion.div
