@@ -11,14 +11,7 @@ export default function BigText({ children, props }: BigTextProps) {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      style={{
-        margin: 0,
-        fontSize: 64,
-        fontWeight: "bold",
-        letterSpacing: "-2.5px",
-        lineHeight: "66px",
-      }}
-      className="text-center"
+      className="m-0 text-center font-bold !text-[64px] leading-[66px] tracking-[2.5px]"
       {...props}
     >
       {children}

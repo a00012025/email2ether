@@ -5,7 +5,11 @@ import "./globals.css";
 
 const queryClient = new QueryClient();
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function RootLayout({
   children,

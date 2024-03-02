@@ -1,0 +1,15 @@
+{
+  "name": "Email2Ether Denver",
+  "description": "Email2Ether Denver is a unique NFT that represents the participation in the Email2Ether demo in Denver.",
+  "image": "ipfs://QmQSKwj7bEBQt16yUeQHaJqE9Aypzw3AWM9FGmqRzNLN8t/2.webp",
+  "attributes": [
+    {
+      "trait_type": "Event",
+      "value": "ETH Denver"
+    },
+    {
+      "trait_type": "Variant",
+      "value": "2"
+    }
+  ]
+}

@@ -8,9 +8,14 @@ import { motion } from "framer-motion";
 import move from "lodash-move";
 import Image from "next/image";
 import { useState } from "react";
-import Noodle1 from "../../public/noodle1.jpg";
-import Noodle2 from "../../public/noodle2.jpeg";
-import Noodle3 from "../../public/noodle3.jpeg";
+
+import nft0 from "@/nfts/0.webp";
+import nft1 from "@/nfts/1.webp";
+import nft2 from "@/nfts/2.webp";
+import nft3 from "@/nfts/3.webp";
+import nft4 from "@/nfts/4.webp";
+import nft5 from "@/nfts/5.webp";
+import { useMutation } from "@tanstack/react-query";
 
 const CARD_COLORS = ["#266678", "#cb7c7a", " #36a18b", "#cda35f", "#747474"];
 const CARD_OFFSET = 40;
@@ -22,7 +27,7 @@ const CARDS = [
     title: "Cup of Noodles",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sit amet semper lacus, in mollis libero",
-    image: Noodle1,
+    image: nft0,
     tag: "noodle",
   },
   {
@@ -30,7 +35,7 @@ const CARDS = [
     title: "Noodles on a wall",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sit amet semper lacus, in mollis libero.",
-    image: Noodle2,
+    image: nft1,
     tag: "noodle",
   },
   {
@@ -38,7 +43,31 @@ const CARDS = [
     title: "Send noodles",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sit amet semper lacus, in mollis libero.",
-    image: Noodle3,
+    image: nft2,
+    tag: "noodle",
+  },
+  {
+    idx: 3,
+    title: "Noodles in a bowl",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sit amet semper lacus, in mollis libero.",
+    image: nft3,
+    tag: "noodle",
+  },
+  {
+    idx: 4,
+    title: "Noodles in a cup",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sit amet semper lacus, in mollis libero.",
+    image: nft4,
+    tag: "noodle",
+  },
+  {
+    idx: 5,
+    title: "Noodles in a bowl",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sit amet semper lacus, in mollis libero.",
+    image: nft5,
     tag: "noodle",
   },
 ];
@@ -50,7 +79,28 @@ const NFTStack = () => {
     (state) => [state.userContractAddress, state.account]
   );
 
-  const mintNft = async (imgIdx: number) => {
+  const {
+    mutate: mintNft,
+    isPending,
+    isError,
+    error,
+    data,
+  } = useMutation({
+    mutationFn: (signedUserOp: any) => {
+      return fetch(
+        `https://sensible-sparrow-admittedly.ngrok-free.app/send_user_op`,
+        {
+          method: "POST",
+          body: JSON.stringify(signedUserOp),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      ).then((res) => res.json());
+    },
+  });
+
+  const handleClick = async (imgIdx: number) => {
     if (!userContractAddress || !userSessionAccount) return;
 
     console.log("Minting NFT...");
@@ -69,6 +119,8 @@ const NFTStack = () => {
     console.log("User op: ", userOp);
     const signedUserOp = await signUserOps(userOp, userSessionAccount);
     console.log("Signed user op: ", signedUserOp);
+
+    mintNft(signedUserOp);
   };
 
   const moveToEnd = (from: number) => {
@@ -137,7 +189,7 @@ const NFTStack = () => {
                       color: "white",
                       backgroundColor: "#2563eb",
                     }}
-                    onClick={() => mintNft(nft.idx)}
+                    onClick={() => handleClick(nft.idx)}
                   >
                     Mint
                   </motion.button>
