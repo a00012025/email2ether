@@ -1,3 +1,9 @@
+import {
+  generateNftMintingCalldata,
+  generateUserOps,
+  signUserOps,
+} from "@/lib/userOps";
+import { usePersistentStore } from "@/store/persistent";
 import { motion } from "framer-motion";
 import move from "lodash-move";
 import Image from "next/image";
@@ -12,6 +18,7 @@ const SCALE_FACTOR = 0.06;
 
 const CARDS = [
   {
+    idx: 0,
     title: "Cup of Noodles",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sit amet semper lacus, in mollis libero",
@@ -19,6 +26,7 @@ const CARDS = [
     tag: "noodle",
   },
   {
+    idx: 1,
     title: "Noodles on a wall",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sit amet semper lacus, in mollis libero.",
@@ -26,6 +34,7 @@ const CARDS = [
     tag: "noodle",
   },
   {
+    idx: 2,
     title: "Send noodles",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sit amet semper lacus, in mollis libero.",
@@ -36,6 +45,31 @@ const CARDS = [
 
 const NFTStack = () => {
   const [cards, setCards] = useState(CARDS);
+
+  const [userContractAddress, userSessionAccount] = usePersistentStore(
+    (state) => [state.userContractAddress, state.account]
+  );
+
+  const mintNft = async (imgIdx: number) => {
+    if (!userContractAddress || !userSessionAccount) return;
+
+    console.log("Minting NFT...");
+    console.log("User contract address: ", userContractAddress);
+    console.log("Image index: ", imgIdx);
+    // Implement minting logic here
+    const calldata = await generateNftMintingCalldata(
+      userContractAddress as string,
+      imgIdx
+    );
+    console.log("Calldata: ", calldata);
+    const userOp = await generateUserOps(
+      userContractAddress as string,
+      calldata
+    );
+    console.log("User op: ", userOp);
+    const signedUserOp = await signUserOps(userOp, userSessionAccount);
+    console.log("Signed user op: ", signedUserOp);
+  };
 
   const moveToEnd = (from: number) => {
     setCards(move(cards, from, cards.length - 1));
@@ -103,6 +137,7 @@ const NFTStack = () => {
                       color: "white",
                       backgroundColor: "#2563eb",
                     }}
+                    onClick={() => mintNft(nft.idx)}
                   >
                     Mint
                   </motion.button>

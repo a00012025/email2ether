@@ -1,11 +1,11 @@
 import { getUserOpHash } from "@account-abstraction/utils";
 import {
+  PrivateKeyAccount,
   createWalletClient,
   encodeFunctionData,
   getContract,
   http,
 } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 import { arbitrumSepolia } from "viem/chains";
 
 import demoNftAbi from "../constants/DemoNftAbi.json";
@@ -59,17 +59,19 @@ export const generateUserOps = async (sender: string, calldata: string) => {
   return {
     sender,
     nonce,
-    calldata,
+    callData: calldata,
+    initCode: "0x",
     callGasLimit: 200000n,
     verificationGasLimit: 100000n,
     preVerificationGas: 100000n,
     maxFeePerGas: BigInt(2e8),
     maxPriorityFeePerGas: BigInt(2e8),
     paymasterAndData: PAYMASTER_ADDRESS,
+    signature: "0x",
   };
 };
 
-export const signUserOps = async (userOp: any, privateKey: string) => {
+export const signUserOps = async (userOp: any, account: PrivateKeyAccount) => {
   const userOpHash = getUserOpHash(
     userOp,
     ENTRYPOINT_ADDRESS,
@@ -77,9 +79,7 @@ export const signUserOps = async (userOp: any, privateKey: string) => {
   );
   console.log("userOpHash", userOpHash);
 
-  userOp.signature = (await privateKeyToAccount(
-    privateKey as `0x${string}`
-  ).signMessage({
+  userOp.signature = (await account.signMessage({
     message: {
       raw: userOpHash as `0x${string}`,
     },

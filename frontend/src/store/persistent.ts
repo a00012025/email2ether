@@ -1,5 +1,5 @@
 import { poseidonCircom, stringToCircomArray } from "@/lib/crypto";
-import { Account, Address } from "viem";
+import { Address, PrivateKeyAccount } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -7,7 +7,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 interface StoreState {
   userVerifiedOwner: boolean; // user is the verified owner
   userContractAddress: Address | null;
-  account: Account | null;
+  account: PrivateKeyAccount | null;
   email: string | null;
   hashedEmail: string | null;
   emailRecieved: boolean;
@@ -26,7 +26,7 @@ type StoreFunctions = {
   setEmailRecieved: (recieved: boolean) => void;
   setUserVerifiedOwner: (verified: boolean) => void;
   setUserContractAddress: (address: Address) => void;
-  setupNewAccount: () => Account;
+  setupNewAccount: () => PrivateKeyAccount;
   setEmail: (email: string) => void;
   setHashedEmail: (email: bigint) => void;
   getHashedEmail: () => bigint;
@@ -54,7 +54,8 @@ export const usePersistentStore = create<StoreState & StoreFunctions>()(
           const privateKey = generatePrivateKey();
           set({ account: privateKeyToAccount(privateKey) });
         }
-        return get().account as Account;
+
+        return get().account as PrivateKeyAccount;
       },
       setEmail: (email: string) => {
         set({ email });
