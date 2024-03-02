@@ -40,7 +40,7 @@ const networks: { [key: string]: Chain } = {
 };
 const accountFactoryContractAddrs: { [key: string]: `0x${string}` } = {
   // "421614": "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7",
-  "421614": "0xaEB3816628ecE25adCD2b0762753065c1277a95D",
+  "421614": "0x2ECC385Af1fb4C7b2f37ad0295e603ed619B7C70",
   // "80001": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
   // "84532": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
   // "59140": "0x0",
@@ -81,8 +81,10 @@ export async function initWallet() {
 export async function createEmailAccount(emailHash: string) {
   return Promise.all(
     Object.keys(networks).map(async (chainId) => {
+      let sentNonce = 0;
       for (let i = 0; i < 3; i++) {
         try {
+          sentNonce = currentNonces[chainId];
           return accountFactories[chainId].write.createAccount(
             [BigInt(emailHash), 0n] as const,
             {
@@ -90,22 +92,17 @@ export async function createEmailAccount(emailHash: string) {
             }
           );
         } catch (error: unknown) {
-          if (error instanceof TransactionExecutionError) {
-            console.log("No!!", error.details);
-          }
-          if (
-            error instanceof TransactionExecutionError &&
-            error.details.includes("nonce too low")
-          ) {
-            error.details;
+          console.log("Caught error in create email acc:", error);
+          currentNonces[chainId] = await publicClients[
+            chainId
+          ].getTransactionCount({
+            address: walletAddress,
+          });
+          if (sentNonce != currentNonces[chainId]) {
+            // nonce too low
             console.log(
               `nonce too low for ${chainId}. Retrying createEmailAccount`
             );
-            currentNonces[chainId] = await publicClients[
-              chainId
-            ].getTransactionCount({
-              address: walletAddress,
-            });
             continue;
           } else {
             throw error;
@@ -137,13 +134,14 @@ export async function transferOwnership(
   publicSignals: any
 ) {
   return Promise.all(
-    Object.keys(networks).map((chainId) => {
+    Object.keys(networks).map(async (chainId) => {
       const emailAccount = getContract({
         address: accountAddresses[chainId],
         abi: EmailAccountAbi,
         client: walletClients[chainId],
       });
       for (let i = 0; i < 3; i++) {
+        let sentNonce = currentNonces[chainId];
         try {
           return emailAccount.write.transferOwnership([proof, publicSignals], {
             account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
@@ -152,20 +150,16 @@ export async function transferOwnership(
             gas: 800000n,
           });
         } catch (error: unknown) {
-          if (error instanceof TransactionExecutionError) {
-            console.log("No!! 2", error.details);
-          }
-          if (
-            error instanceof TransactionExecutionError &&
-            error.details.includes("nonce too low")
-          ) {
+          console.log("Caught error in transfer ownership:", error);
+          currentNonces[chainId] = await publicClients[
+            chainId
+          ].getTransactionCount({
+            address: walletAddress,
+          });
+          if (sentNonce != currentNonces[chainId]) {
+            // nonce too low
             console.log(
               `nonce too low for ${chainId}. Retrying transferOwnership`
-            );
-            currentNonces[chainId] = publicClients[chainId].getTransactionCount(
-              {
-                address: walletAddress,
-              }
             );
             continue;
           } else {
@@ -185,7 +179,7 @@ export async function handleOps(chainId: string) {
     client: walletClients[chainId]!,
   });
   const userOp = {
-    sender: "0xD188Ed79C8312A40bc0ea9FD482964c04D2A7837" as const,
+    sender: "0x3730a6137887C55D6D1871A91500a64EF649F8B7" as const,
     nonce: 0n,
     initCode: "0x" as const,
     callData:
