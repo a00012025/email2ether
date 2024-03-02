@@ -24,13 +24,13 @@ async function main() {
 
     // create email account
     let txHash = await createEmailAccount(emailHash);
-    const accountAddress = await getEmailAccountAddress(emailHash);
+    const accountAddresses = await getEmailAccountAddress(emailHash);
     console.log(
-      `Contract account created. Address: ${accountAddress}, txHash: ${txHash}`
+      `Contract account created. Address: ${JSON.stringify(accountAddresses)}, txHash: ${txHash}`
     );
 
     // send proof to chain
-    txHash = await transferOwnership(accountAddress, proof, publicSignals);
+    txHash = await transferOwnership(accountAddresses, proof, publicSignals);
     console.log("Ownership transferred. txHash:", txHash);
   });
 }

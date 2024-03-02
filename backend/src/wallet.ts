@@ -14,9 +14,9 @@ import {
   baseSepolia,
   lineaTestnet,
 } from "viem/chains";
+import { zircuitTestnet } from "./utils/zircuit";
 import { privateKeyToAccount } from "viem/accounts";
 import EmailAccountFactoryAbi from "./abi/EmailAccountFactory";
-import { zircuitTestnet } from "./utils/zircuit";
 require("dotenv").config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
@@ -27,7 +27,7 @@ if (!PRIVATE_KEY) {
 const networks: { [key: string]: Chain } = {
   "42161": arbitrumSepolia,
   "80001": polygonMumbai,
-  // "84532": baseSepolia,
+  "84532": baseSepolia,
   // "59140": lineaTestnet,
   // "11155111": sepolia,
   // "48899": zircuitTestnet,
@@ -35,7 +35,7 @@ const networks: { [key: string]: Chain } = {
 const accountFactoryContractAddrs: { [key: string]: `0x${string}` } = {
   "42161": "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7",
   "80001": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
-  // "84532": "0x0",
+  "84532": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
   // "59140": "0x0",
   // "11155111": "0x0",
   // "48899": "0x0",
@@ -55,6 +55,7 @@ for (const [chainId, network] of Object.entries(networks)) {
     client: walletClients[chainId],
   });
 }
+const walletAddress = walletClients["42161"].account!.address as `0x${string}`;
 const publicClients: { [key: string]: any } = {};
 const currentNonces: { [key: string]: number } = {};
 
@@ -65,20 +66,39 @@ export async function initWallet() {
       transport: http(),
     });
     currentNonces[chainId] = await publicClients[chainId].getTransactionCount({
-      address: walletClients[chainId].account!.address as `0x${string}`,
+      address: walletAddress,
     });
   }
 }
 
 export async function createEmailAccount(emailHash: string) {
   return Promise.all(
-    Object.keys(networks).map((chainId) => {
-      return accountFactories[chainId].write.createAccount(
-        [BigInt(emailHash), 0n] as const,
-        {
-          nonce: currentNonces[chainId]++,
+    Object.keys(networks).map(async (chainId) => {
+      try {
+        return accountFactories[chainId].write.createAccount(
+          [BigInt(emailHash), 0n] as const,
+          {
+            nonce: currentNonces[chainId]++,
+          }
+        );
+      } catch (error: any) {
+        if (error.message.includes("nonce too low")) {
+          console.log(
+            `nonce too low for ${chainId}. Retrying createEmailAccount`
+          );
+          currentNonces[chainId] = await publicClients[
+            chainId
+          ].getTransactionCount({
+            address: walletAddress,
+          });
+          return accountFactories[chainId].write.createAccount(
+            [BigInt(emailHash), 0n] as const,
+            {
+              nonce: currentNonces[chainId]++,
+            }
+          );
         }
-      );
+      }
     })
   );
 }
@@ -109,12 +129,29 @@ export async function transferOwnership(
         abi: EmailAccountAbi,
         client: walletClients[chainId],
       });
-      return emailAccount.write.transferOwnership([proof, publicSignals], {
-        account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
-        chain: networks[chainId],
-        nonce: currentNonces[chainId]++,
-        gas: 800000n,
-      });
+      try {
+        return emailAccount.write.transferOwnership([proof, publicSignals], {
+          account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
+          chain: networks[chainId],
+          nonce: currentNonces[chainId]++,
+          gas: 800000n,
+        });
+      } catch (error: any) {
+        if (error.message.includes("nonce too low")) {
+          console.log(
+            `nonce too low for ${chainId}. Retrying transferOwnership`
+          );
+          currentNonces[chainId] = publicClients[chainId].getTransactionCount({
+            address: walletAddress,
+          });
+          return emailAccount.write.transferOwnership([proof, publicSignals], {
+            account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
+            chain: networks[chainId],
+            nonce: currentNonces[chainId]++,
+            gas: 800000n,
+          });
+        }
+      }
     })
   );
 }
