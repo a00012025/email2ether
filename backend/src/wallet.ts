@@ -85,12 +85,13 @@ export async function createEmailAccount(emailHash: string) {
       for (let i = 0; i < 3; i++) {
         try {
           sentNonce = currentNonces[chainId];
-          return accountFactories[chainId].write.createAccount(
+          const result = await accountFactories[chainId].write.createAccount(
             [BigInt(emailHash), 0n] as const,
             {
               nonce: currentNonces[chainId]++,
             }
           );
+          return result;
         } catch (error: unknown) {
           console.log("Caught error in create email acc:", error);
           currentNonces[chainId] = await publicClients[
@@ -180,7 +181,7 @@ export async function handleOps(chainId: string) {
   });
   const userOp = {
     sender: "0x3730a6137887C55D6D1871A91500a64EF649F8B7" as const,
-    nonce: 0n,
+    nonce: 1n,
     initCode: "0x" as const,
     callData:
       "0xb61d27f60000000000000000000000000000007eabfc2e6a6b33b21d2f73d58941bab574000000000000000000000000000000000000000000000000000000003b9aca0000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000" as const,
@@ -189,7 +190,7 @@ export async function handleOps(chainId: string) {
     preVerificationGas: 200000n,
     maxFeePerGas: BigInt(2e8),
     maxPriorityFeePerGas: BigInt(2e8),
-    paymasterAndData: "0x" as const,
+    paymasterAndData: "0xFB0AD3C188DC1D3D490C4e00aBF261Aa5613a25b" as const,
     signature: "0x" as `0x${string}`,
   };
 
