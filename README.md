@@ -166,21 +166,21 @@ Our project is brought to life by a dedicated team of professionals. Get to know
 ### Harry Chen - Full Stack Developer
 
 <p align="left">
-  <img src="https://github.com/a00012025.png" width="100" height="100" style="border-radius:50%; margin-right: 20px;" alt="Alex Johnson">
+  <img src="https://github.com/a00012025.png" width="100" height="100" style="border-radius:50%; margin-right: 20px;" alt="Harry Chen">
   <strong>Harry Chen</strong> is a Full Stack Developer with a strong focus on integrating zero-knowledge proofs to enhance the project's functionality. As the Lead Developer, his extensive knowledge ensures the project's workflow is seamless and efficient, underpinning the technical architecture with advanced solutions. <a href="https://github.com/a00012025">Profile</a>
 </p>
 
 ### Kuan - Frontend & Smart Contract Developer
 
 <p align="left">
-  <img src="https://github.com/kuan0808.png" width="100" height="100" style="border-radius:50%; margin-right: 20px;" alt="Maria Lopez">
+  <img src="https://github.com/kuan0808.png" width="100" height="100" style="border-radius:50%; margin-right: 20px;" alt="Kuan">
   <strong>Kuan</strong> is a key developer focusing on smart contract development for decentralized applications, complementing his expertise with frontend development to enhance user interfaces.  <a href="https://github.com/kuan0808">Profile</a>
 </p>
 
 ### Sterling Cobb - Frontend Developer & UI/UX Designer
 
 <p align="left">
-  <img src="https://github.com/fourcolors.png" width="100" height="100" style="border-radius:50%; margin-right: 20px;" alt="Raj Patel">
+  <img src="https://github.com/fourcolors.png" width="100" height="100" style="border-radius:50%; margin-right: 20px;" alt="Sterling Cobb">
   <strong>Sterling Cobb</strong> leverages his sharp design instincts and creativity to elevate the project's aesthetics and user experience. His commitment to intuitive design and user-centric development ensures the application is not only visually captivating but also offers an unparalleled user experience. <a href="https://github.com/fourcolors">Profile</a>
 </p>
 
