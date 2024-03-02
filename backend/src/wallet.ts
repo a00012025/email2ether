@@ -5,6 +5,7 @@ import {
   createWalletClient,
   Chain,
   WalletClient,
+  TransactionExecutionError,
 } from "viem";
 import EmailAccountAbi from "./abi/EmailAccount";
 import {
@@ -17,6 +18,7 @@ import {
 import { zircuitTestnet } from "./utils/zircuit";
 import { privateKeyToAccount } from "viem/accounts";
 import EmailAccountFactoryAbi from "./abi/EmailAccountFactory";
+import EntryPointAbi from "./abi/EntryPoint";
 require("dotenv").config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
@@ -74,31 +76,35 @@ export async function initWallet() {
 export async function createEmailAccount(emailHash: string) {
   return Promise.all(
     Object.keys(networks).map(async (chainId) => {
-      try {
-        return accountFactories[chainId].write.createAccount(
-          [BigInt(emailHash), 0n] as const,
-          {
-            nonce: currentNonces[chainId]++,
-          }
-        );
-      } catch (error: any) {
-        if (error.message.includes("nonce too low")) {
-          console.log(
-            `nonce too low for ${chainId}. Retrying createEmailAccount`
-          );
-          currentNonces[chainId] = await publicClients[
-            chainId
-          ].getTransactionCount({
-            address: walletAddress,
-          });
+      for (let i = 0; i < 3; i++) {
+        try {
           return accountFactories[chainId].write.createAccount(
             [BigInt(emailHash), 0n] as const,
             {
               nonce: currentNonces[chainId]++,
             }
           );
+        } catch (error: unknown) {
+          if (
+            error instanceof TransactionExecutionError &&
+            error.details.includes("nonce too low")
+          ) {
+            error.details;
+            console.log(
+              `nonce too low for ${chainId}. Retrying createEmailAccount`
+            );
+            currentNonces[chainId] = await publicClients[
+              chainId
+            ].getTransactionCount({
+              address: walletAddress,
+            });
+            continue;
+          } else {
+            throw error;
+          }
         }
       }
+      throw new Error("Failed to create email account after 3 retries");
     })
   );
 }
@@ -129,29 +135,68 @@ export async function transferOwnership(
         abi: EmailAccountAbi,
         client: walletClients[chainId],
       });
-      try {
-        return emailAccount.write.transferOwnership([proof, publicSignals], {
-          account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
-          chain: networks[chainId],
-          nonce: currentNonces[chainId]++,
-          gas: 800000n,
-        });
-      } catch (error: any) {
-        if (error.message.includes("nonce too low")) {
-          console.log(
-            `nonce too low for ${chainId}. Retrying transferOwnership`
-          );
-          currentNonces[chainId] = publicClients[chainId].getTransactionCount({
-            address: walletAddress,
-          });
+      for (let i = 0; i < 3; i++) {
+        try {
           return emailAccount.write.transferOwnership([proof, publicSignals], {
             account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
             chain: networks[chainId],
             nonce: currentNonces[chainId]++,
             gas: 800000n,
           });
+        } catch (error: unknown) {
+          if (
+            error instanceof TransactionExecutionError &&
+            error.details.includes("nonce too low")
+          ) {
+            console.log(
+              `nonce too low for ${chainId}. Retrying transferOwnership`
+            );
+            currentNonces[chainId] = publicClients[chainId].getTransactionCount(
+              {
+                address: walletAddress,
+              }
+            );
+            continue;
+          } else {
+            throw error;
+          }
         }
       }
+      throw new Error("Failed to transfer ownership after 3 retries");
     })
+  );
+}
+
+export async function handleOps(chainId: string) {
+  const entryPoint = getContract({
+    address: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+    abi: EntryPointAbi,
+    client: walletClients[chainId]!,
+  });
+  return entryPoint.write.handleOps(
+    [
+      [
+        {
+          sender: "0x219d4f0301A75Ff2bA4D61a64aE67e58027d7721",
+          nonce: 0n,
+          initCode: "0x0",
+          callData: "0x313233",
+          callGasLimit: 50000n,
+          verificationGasLimit: 50000n,
+          preVerificationGas: 50000n,
+          maxFeePerGas: BigInt(4e9),
+          maxPriorityFeePerGas: BigInt(4e9),
+          paymasterAndData: "0x",
+          signature: "0x1234",
+        },
+      ],
+      walletAddress,
+    ],
+    {
+      account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
+      chain: networks[chainId],
+      nonce: currentNonces[chainId]++,
+      gas: 500000n,
+    }
   );
 }
