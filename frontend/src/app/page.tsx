@@ -357,47 +357,51 @@ export default function HomePage() {
         variants={sectionVariants}
         className="section"
       >
-        <motion.div className="mt-8 mb-8">
-          <LottiePlayer
-            loop={false}
-            animationData={downArrowAnimation}
-            style={{ width: "200px", height: "200px" }}
-          />
-        </motion.div>
+        {userHashedEmail && (
+          <>
+            <motion.div className="mt-8 mb-8">
+              <LottiePlayer
+                loop={false}
+                animationData={downArrowAnimation}
+                style={{ width: "200px", height: "200px" }}
+              />
+            </motion.div>
 
-        <motion.div className="px-12 tm-2">
-          <BigText>Let's Claim it by Sending an Email!</BigText>
-        </motion.div>
-        <div>
-          <p className="italic text-sm">
-            Only YOUR email address can claim this address
-          </p>
-        </div>
-        <motion.div className="flex justify-center">
-          <LottiePlayer
-            animationData={pinkEmailAnimation}
-            autoplay={false}
-            lottieRef={pinkEmailRef}
-            style={{ height: "400px", width: "500px" }}
-          />
-        </motion.div>
-        <motion.div
-          className="flex justify-center mt-3"
-          style={{ width: "200px" }}
-        >
-          {account && account.address && (
-            <MailtoLink
-              onClicked={() => {
-                pinkEmailRef.current?.play();
-              }}
-              changeAddress={account.address}
-              onEmailSent={() => {
-                changeOwner();
-                section3.current?.scrollIntoView({ behavior: "smooth" });
-              }}
-            />
-          )}
-        </motion.div>
+            <motion.div className="px-12 tm-2">
+              <BigText>Let's Claim it by Sending an Email!</BigText>
+            </motion.div>
+            <div>
+              <p className="italic text-sm">
+                Only YOUR email address can claim this address
+              </p>
+            </div>
+            <motion.div className="flex justify-center">
+              <LottiePlayer
+                animationData={pinkEmailAnimation}
+                autoplay={false}
+                lottieRef={pinkEmailRef}
+                style={{ height: "400px", width: "500px" }}
+              />
+            </motion.div>
+            <motion.div
+              className="flex justify-center mt-3"
+              style={{ width: "200px" }}
+            >
+              {account && account.address && (
+                <MailtoLink
+                  onClicked={() => {
+                    pinkEmailRef.current?.play();
+                  }}
+                  changeAddress={account.address}
+                  onEmailSent={() => {
+                    changeOwner();
+                    section3.current?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                />
+              )}
+            </motion.div>
+          </>
+        )}
       </motion.div>
       <motion.div ref={section3} id="section-3" className="section">
         <motion.div className="px-12 tm-2 relative">
