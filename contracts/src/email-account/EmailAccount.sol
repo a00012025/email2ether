@@ -36,7 +36,7 @@ contract EmailAccount is
     address public owner;
     uint256 public emailHash;
 
-    IEntryPoint private immutable _entryPoint;
+    IEntryPoint private _entryPoint;
 
     uint16 public constant bytesInPackedBytes = 31;
 
@@ -50,7 +50,7 @@ contract EmailAccount is
     uint32 public constant ownerIndexInSignals = 2; // index of first packed owner address in signals array
     uint32 public constant ownerLengthInSignals = 2; // length of packed owner address in signals array
     uint32 public constant nullifierIndexInSignals = 4; // index of nullifier in signals array
-    Verifier public immutable verifier;
+    Verifier public verifier;
     mapping(uint256 => bool) public usedNullifiers;
 
     event EmailAccountInitialized(
@@ -209,11 +209,21 @@ contract EmailAccount is
      * a new implementation of EmailAccount must be deployed with the new EntryPoint address, then upgrading
      * the implementation by calling `upgradeTo()`
      */
-    function initialize(uint256 anEmailHash) public virtual initializer {
-        _initialize(anEmailHash);
+    function initialize(
+        IEntryPoint anEntryPoint,
+        Verifier anVerifier,
+        uint256 anEmailHash
+    ) public virtual initializer {
+        _initialize(anEntryPoint, anVerifier, anEmailHash);
     }
 
-    function _initialize(uint256 anEmailHash) internal virtual {
+    function _initialize(
+        IEntryPoint anEntryPoint,
+        Verifier anVerifier,
+        uint256 anEmailHash
+    ) internal virtual {
+        _entryPoint = anEntryPoint;
+        verifier = anVerifier;
         emailHash = anEmailHash;
         emit EmailAccountInitialized(_entryPoint, anEmailHash);
     }

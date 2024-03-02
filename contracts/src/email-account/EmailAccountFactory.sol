@@ -2,6 +2,7 @@
 pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/utils/Create2.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "./EmailAccount.sol";
@@ -12,11 +13,30 @@ import "./EmailAccount.sol";
  * The factory's createAccount returns the target account address even if it is already installed.
  * This way, the entryPoint.getSenderAddress() can be called either before or after the account is created.
  */
-contract EmailAccountFactory {
-    EmailAccount public immutable accountImplementation;
+contract EmailAccountFactory is Initializable {
+    IEntryPoint private _entryPoint;
+    Verifier public verifier;
+    EmailAccount public accountImplementation;
 
-    constructor(IEntryPoint _entryPoint, Verifier _verifier) {
-        accountImplementation = new EmailAccount(_entryPoint, _verifier);
+    constructor(
+        IEntryPoint anEntryPoint,
+        Verifier anVerifier,
+        EmailAccount _emailAccountImpl
+    ) {
+        _entryPoint = anEntryPoint;
+        verifier = anVerifier;
+        accountImplementation = _emailAccountImpl;
+        _disableInitializers();
+    }
+
+    function initialize(
+        IEntryPoint anEntryPoint,
+        Verifier anVerifier,
+        EmailAccount _emailAccountImpl
+    ) public initializer {
+        _entryPoint = anEntryPoint;
+        verifier = anVerifier;
+        accountImplementation = _emailAccountImpl;
     }
 
     /**
@@ -25,28 +45,50 @@ contract EmailAccountFactory {
      * Note that during UserOperation execution, this method is called only if the account is not deployed.
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
-    function createAccount(uint256 emailHash, uint256 salt) public returns (EmailAccount ret) {
+    function createAccount(
+        uint256 emailHash,
+        uint256 salt
+    ) public returns (EmailAccount ret) {
         address addr = getAddress(emailHash, salt);
         uint codeSize = addr.code.length;
         if (codeSize > 0) {
             return EmailAccount(payable(addr));
         }
-        ret = EmailAccount(payable(new ERC1967Proxy{salt : bytes32(salt)}(
-                address(accountImplementation),
-                abi.encodeCall(EmailAccount.initialize, (emailHash))
-            )));
+        ret = EmailAccount(
+            payable(
+                new ERC1967Proxy{salt: bytes32(salt)}(
+                    address(accountImplementation),
+                    abi.encodeCall(
+                        EmailAccount.initialize,
+                        (_entryPoint, verifier, emailHash)
+                    )
+                )
+            )
+        );
     }
 
     /**
      * calculate the counterfactual address of this account as it would be returned by createAccount()
      */
-    function getAddress(uint256 emailHash,uint256 salt) public view returns (address) {
-        return Create2.computeAddress(bytes32(salt), keccak256(abi.encodePacked(
-                type(ERC1967Proxy).creationCode,
-                abi.encode(
-                    address(accountImplementation),
-                    abi.encodeCall(EmailAccount.initialize, (emailHash))
+    function getAddress(
+        uint256 emailHash,
+        uint256 salt
+    ) public view returns (address) {
+        return
+            Create2.computeAddress(
+                bytes32(salt),
+                keccak256(
+                    abi.encodePacked(
+                        type(ERC1967Proxy).creationCode,
+                        abi.encode(
+                            address(accountImplementation),
+                            abi.encodeCall(
+                                EmailAccount.initialize,
+                                (_entryPoint, verifier, emailHash)
+                            )
+                        )
+                    )
                 )
-            )));
+            );
     }
 }

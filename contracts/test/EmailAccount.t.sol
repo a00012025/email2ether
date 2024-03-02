@@ -9,9 +9,13 @@ import "../src/email-account/EmailAccountFactory.sol";
 contract EmailAccountTest is Test {
     function test_createAndTransfer() public {
         Verifier verifier = new Verifier();
+        IEntryPoint entryPoint = IEntryPoint(
+            0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
+        );
         EmailAccountFactory factory = new EmailAccountFactory(
-            IEntryPoint(address(0x01234)),
-            verifier
+            entryPoint,
+            verifier,
+            new EmailAccount(entryPoint, verifier)
         );
         EmailAccount acc = factory.createAccount(
             821083277066694476086357957525518859078150413711136385700205787864112229935,
