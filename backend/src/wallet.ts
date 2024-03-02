@@ -10,7 +10,6 @@ import {
 } from "viem";
 import EmailAccountAbi from "./abi/EmailAccount";
 import {
-  sepolia,
   arbitrumSepolia,
   polygonMumbai,
   baseSepolia,
@@ -32,19 +31,17 @@ if (!PRIVATE_KEY) {
 
 const networks: { [key: string]: Chain } = {
   "421614": arbitrumSepolia,
-  // "80001": polygonMumbai,
-  // "84532": baseSepolia,
-  // "59140": lineaTestnet,
-  // "11155111": sepolia,
-  // "48899": zircuitTestnet,
+  "80001": polygonMumbai,
+  "84532": baseSepolia,
+  "59140": lineaTestnet,
+  "48899": zircuitTestnet,
 };
 const accountFactoryContractAddrs: { [key: string]: `0x${string}` } = {
   "421614": "0x2ECC385Af1fb4C7b2f37ad0295e603ed619B7C70",
-  // "80001": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
-  // "84532": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
-  // "59140": "0x0",
-  // "11155111": "0x0",
-  // "48899": "0x0",
+  "80001": "0x2ffbd824342F067dce1FD5635c4e8c930DE67411",
+  "84532": "0x87AF054a2629761eb34dd5bfb1B5a6AD9b972C6f",
+  "59140": "0x7356f4cC77168d0e6f94F1d8E28aeA1316852c0d",
+  "48899": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
 };
 
 const walletClients: { [key: string]: WalletClient } = {};
