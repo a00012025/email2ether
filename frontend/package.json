@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@account-abstraction/utils": "^0.6.0",
     "@tanstack/react-query": "^5.24.1",
     "@types/circomlibjs": "^0.1.6",
     "@types/react-lottie": "^1.2.10",
