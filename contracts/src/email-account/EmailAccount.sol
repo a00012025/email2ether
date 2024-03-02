@@ -5,7 +5,6 @@ pragma solidity ^0.8.12;
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
 
-import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
@@ -30,7 +29,7 @@ contract EmailAccount is
     Initializable
 {
     using ECDSA for bytes32;
-    using MessageHashUtils for bytes32;
+    // using MessageHashUtils for bytes32;
     using StringUtils for *;
 
     address public owner;
