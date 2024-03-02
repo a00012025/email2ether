@@ -1,5 +1,6 @@
 import { readFileSync } from "fs";
 import express from "express";
+import bodyParser from "body-parser";
 import { initWallet, handleOpsRaw } from "./wallet";
 
 async function main() {
@@ -11,6 +12,7 @@ async function main() {
     res.setHeader("Access-Control-Allow-Origin", "*");
     next();
   });
+  app.use(bodyParser.json());
   app.get("/account", (req, res) => {
     const emailHash = req.query.email_hash;
     if (!emailHash) {
