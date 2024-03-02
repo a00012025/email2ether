@@ -39,7 +39,6 @@ const networks: { [key: string]: Chain } = {
   // "48899": zircuitTestnet,
 };
 const accountFactoryContractAddrs: { [key: string]: `0x${string}` } = {
-  // "421614": "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7",
   "421614": "0x2ECC385Af1fb4C7b2f37ad0295e603ed619B7C70",
   // "80001": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
   // "84532": "0xD570bF4598D3ccF214E288dd92222b8Bd3134984",
