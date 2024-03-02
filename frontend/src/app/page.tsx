@@ -9,6 +9,7 @@ import ProgressBar from "@/components/ProgressBar";
 import EmailAccountFactoryAbi from "@/constants/EmailAccountFactoryAbi";
 import dotAnimation from "@/constants/dots.json";
 import downArrowAnimation from "@/constants/downArrow.json";
+import ethWalletAnimation from "@/constants/ethWallet.json";
 import loadingBlockchainAnimation from "@/constants/loadingBlockchain.json";
 import pinkEmailAnimation from "@/constants/pinkEmail.json";
 import profileAnimation from "@/constants/profile.json";
@@ -40,6 +41,16 @@ const pinkEmail = {
   autoplay: true,
   animationData: pinkEmailAnimation,
 
+  rendererSettings: {
+    preserveAspectRatio: "xMidYMid slice",
+  },
+};
+
+const ethWalletOptions = {
+  loop: false,
+  autoplay: false,
+  animationData: ethWalletAnimation,
+  speed: 0.01,
   rendererSettings: {
     preserveAspectRatio: "xMidYMid slice",
   },
@@ -97,10 +108,17 @@ const sendOptions = {
 
 const EMAIL_FACTORY_ADDRESS = "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7";
 export default function HomePage() {
-  const sendEmailSectionRef = useRef<Ref<HTMLDivElement>>(null);
+  const section1 = useRef<Ref<HTMLDivElement>>(null);
+  const section2 = useRef<Ref<HTMLDivElement>>(null);
+  const section3 = useRef<Ref<HTMLDivElement>>(null);
+  const section4 = useRef<Ref<HTMLDivElement>>(null);
+  const section5 = useRef<Ref<HTMLDivElement>>(null);
+
   const [loading, setLoading] = useState(false);
   const controls = useAnimation();
-  const { loading: loadingChangeOwner, changeOwner } = useChangeOwner();
+  const { loading: loadingChangeOwner, changeOwner } = useChangeOwner(() => {
+    section4.current?.scrollIntoView({ behavior: "smooth" });
+  });
   const userVerified = usePersistentStore((state) => state.userVerifiedOwner);
 
   // setup the account
@@ -163,7 +181,7 @@ export default function HomePage() {
           setTimeout(() => {
             console.log("done loading", userContractAddress);
             setLoading(false);
-            sendEmailSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+            section5.current?.scrollIntoView({ behavior: "smooth" });
           }, 3000);
         });
     } else {
@@ -183,6 +201,7 @@ export default function HomePage() {
     <motion.div>
       <motion.div
         id="section-1"
+        ref={section1}
         className="section"
         style={{ justifyContent: "start", marginTop: "98px" }}
       >
@@ -255,13 +274,12 @@ export default function HomePage() {
         </motion.div>
       </motion.div>
       <motion.div
-        id="section-2"
-        ref={sendEmailSectionRef}
-        initial="visible"
-        // animate={userContractAddress && !loading ? "visible" : "hidden"}
-        variants={sectionVariants}
+        ref={section5}
+        id="section-5"
         className="section"
+        style={{ justifyContent: "center", paddingBottom: "300px" }}
       >
+        <Lottie options={ethWalletOptions} height={300} width={300} />
         <motion.div className="px-12 mb-6">
           <BigText>Your Unique Address</BigText>
         </motion.div>
@@ -276,6 +294,15 @@ export default function HomePage() {
             {userContractAddress}
           </div>
         </motion.div>
+      </motion.div>
+      <motion.div
+        id="section-2"
+        ref={section2}
+        initial="visible"
+        // animate={userContractAddress && !loading ? "visible" : "hidden"}
+        variants={sectionVariants}
+        className="section"
+      >
         <motion.div className="mt-8 mb-8">
           <Lottie options={downArrowOptions} height={200} width={200} />
         </motion.div>
@@ -298,12 +325,15 @@ export default function HomePage() {
           {account && account.address && (
             <MailtoLink
               changeAddress={account.address}
-              onEmailSent={changeOwner}
+              onEmailSent={() => {
+                changeOwner();
+                section3.current?.scrollIntoView({ behavior: "smooth" });
+              }}
             />
           )}
         </motion.div>
       </motion.div>
-      <motion.div id="section-3" className="section">
+      <motion.div ref={section3} id="section-3" className="section">
         <motion.div className="px-12 tm-2 relative">
           <BigText>Connecting You to Your Wallet</BigText>
           {!loadingChangeOwner && (
@@ -318,24 +348,29 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
       </motion.div>
-      <motion.div id="section-4" className="section">
+      <motion.div
+        ref={section4}
+        id="section-4"
+        className="section justify-start"
+        style={{ marginBottom: "48px", justifyContent: "start" }}
+      >
         <BigText>That was Awesome!</BigText>
-        <p className="text-center px-32 m-0">
+        <p className="text-center px-32 m-0 pt-6">
           Try out your new wallet by minting a free NFT below
         </p>
         <p className="text-center text-sm px-32 m-0">
           (Don't worry, we'll pay all the fees!)
         </p>
-        <Lottie options={profileOptions} height={200} width={200} />
-        <motion.div className="text-center">
-          <p className="text-gray-800 m-0 font-bold bg-slate-400 ">
-            {userContractAddress}
-          </p>
-          <p className="text-blue-500 mt-1">{0} ETH</p>
+        <motion.div className="flex justify-center  flex-col mb-10">
+          <Lottie options={profileOptions} height={200} width={200} />
+          <motion.div className="text-center">
+            <p className="text-gray-800 m-0 font-bold shadow rounded-2xl p-3 ">
+              {userContractAddress} sadfsdf
+            </p>
+          </motion.div>
         </motion.div>
-        <motion.div className="flex justify-center">
-          <NFTStack />
-        </motion.div>
+
+        <NFTStack />
       </motion.div>{" "}
       {/* END SECTION 4*/}
     </motion.div>

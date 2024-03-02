@@ -7,7 +7,7 @@ import Noodle2 from "../../public/noodle2.jpeg";
 import Noodle3 from "../../public/noodle3.jpeg";
 
 const CARD_COLORS = ["#266678", "#cb7c7a", " #36a18b", "#cda35f", "#747474"];
-const CARD_OFFSET = 20;
+const CARD_OFFSET = 40;
 const SCALE_FACTOR = 0.06;
 
 const CARDS = [
@@ -42,7 +42,7 @@ const NFTStack = () => {
   };
 
   return (
-    <div style={wrapperStyle}>
+    <motion.div style={{ height: "100%", marginTop: "40px" }}>
       <ul style={cardWrapStyle}>
         {cards.map((nft, index) => {
           const canDrag = index === 0;
@@ -66,8 +66,6 @@ const NFTStack = () => {
                 bottom: 0,
               }}
               onDragEnd={() => {
-                console.log("this is the end");
-
                 moveToEnd(index);
               }}
             >
@@ -89,26 +87,33 @@ const NFTStack = () => {
                   <div className="font-bold text-xl mb-2">{nft.title}</div>
                   <p className="text-gray-700 text-base">{nft.description}</p>
                 </div>
-                <div className="px-6 pt-4 pb-2">
+                <div className="flex px-6 pt-4 pb-2 justify-between">
                   <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
                     #{nft.tag}
                   </span>
+                  <motion.button
+                    whileHover={{ backgroundColor: "#1D4ED8" }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-4 py-2 cursor-pointer font-bold bg-[#3139FBFF] rounded-lg"
+                    style={{
+                      border: "none",
+                      right: 12,
+                      top: 10,
+                      height: "36px",
+                      color: "white",
+                      backgroundColor: "#2563eb",
+                    }}
+                  >
+                    Mint
+                  </motion.button>
                 </div>
               </motion.div>
             </motion.li>
           );
         })}
       </ul>
-    </div>
+    </motion.div>
   );
-};
-
-const wrapperStyle = {
-  position: "relative" as "relative",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  height: "100vh",
 };
 
 const cardWrapStyle = {

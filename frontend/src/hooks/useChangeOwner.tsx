@@ -2,7 +2,11 @@ import { publicClient } from "@/lib/wallet";
 import { usePersistentStore } from "@/store/persistent";
 import { useEffect, useState } from "react";
 
-export const useChangeOwner = () => {
+export const useChangeOwner = ({
+  onOwnerChanged,
+}: {
+  onOwnerChanged: () => void;
+}) => {
   const account = usePersistentStore((state) => state.account);
   const userContractAddress = usePersistentStore(
     (state) => state.userContractAddress
@@ -35,6 +39,7 @@ export const useChangeOwner = () => {
             setLoading(false);
             unwatch();
             console.log("Account is verified!", accountAddress);
+            onOwnerChanged();
           }
         },
       });
