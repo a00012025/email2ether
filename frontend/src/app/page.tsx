@@ -18,6 +18,7 @@ import { useChangeOwner } from "@/hooks/useChangeOwner";
 import { publicClient } from "@/lib/wallet";
 import { getHashedEmail, usePersistentStore } from "@/store/persistent";
 import { motion, useAnimation } from "framer-motion";
+import LottiePlayer from "lottie-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Ref, useEffect, useRef, useState } from "react";
@@ -120,6 +121,7 @@ export default function HomePage() {
     section4.current?.scrollIntoView({ behavior: "smooth" });
   });
   const userVerified = usePersistentStore((state) => state.userVerifiedOwner);
+  const [showSection1Arrow, setShowSection1Arrow] = useState(false);
 
   // setup the account
   const setupAccount = usePersistentStore((state) => state.setupNewAccount);
@@ -143,6 +145,9 @@ export default function HomePage() {
   const { register, handleSubmit } = useForm<FormData>();
   const registerEmail = usePersistentStore((state) => state.setEmail);
   const setHashedEmail = usePersistentStore((state) => state.setHashedEmail);
+
+  // Lottie Refs
+  const section1Arrow = useRef(null);
 
   async function getContractAddress(email: string) {
     if (email) {
@@ -181,7 +186,13 @@ export default function HomePage() {
           setTimeout(() => {
             console.log("done loading", userContractAddress);
             setLoading(false);
-            section5.current?.scrollIntoView({ behavior: "smooth" });
+
+            setShowSection1Arrow(true);
+            setTimeout(() => {
+              section5.current?.scrollIntoView({ behavior: "smooth" });
+            }, 2000);
+
+            // trigger animation here
           }, 3000);
         });
     } else {
@@ -203,7 +214,11 @@ export default function HomePage() {
         id="section-1"
         ref={section1}
         className="section"
-        style={{ justifyContent: "start", marginTop: "98px" }}
+        style={{
+          justifyContent: "start",
+          marginTop: "48px",
+          position: "relative",
+        }}
       >
         <div className="flex mb-4 rounded-2xl  my-a p-2 bg-[#1D4ED8] mt-20">
           <Image src={logo} alt="logo" width={100} height={100} />
@@ -272,6 +287,21 @@ export default function HomePage() {
             </motion.button>
           </form>
         </motion.div>
+        {showSection1Arrow && (
+          <LottiePlayer
+            ref={section1Arrow}
+            animationData={downArrowAnimation}
+            loop={false}
+            autoplay={true}
+            initialSegment={[5, 60]}
+            style={{
+              width: "300px",
+              height: "300px",
+              position: "absolute",
+              bottom: "58px",
+            }}
+          />
+        )}
       </motion.div>
       <motion.div
         ref={section5}
@@ -304,7 +334,11 @@ export default function HomePage() {
         className="section"
       >
         <motion.div className="mt-8 mb-8">
-          <Lottie options={downArrowOptions} height={200} width={200} />
+          <LottiePlayer
+            loop={false}
+            animationData={downArrowAnimation}
+            style={{ width: "200px", height: "200px" }}
+          />
         </motion.div>
 
         <motion.div className="px-12 tm-2">

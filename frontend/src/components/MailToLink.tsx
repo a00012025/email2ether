@@ -65,7 +65,8 @@ function MailtoLink({
   } = useQuery<AccountStatus, Error>({
     queryKey: ["accountStatus", hashedEmail.toString()],
     queryFn: () => fetchAccountStatus(hashedEmail),
-    refetchInterval: (data) => (data?.processing === true ? false : 2000),
+    //refetchInterval: (data) => (data?.processing === true ? false : 2000),
+    refetchInterval: polling ? 2000 : false,
     enabled: polling,
   });
 
@@ -74,9 +75,10 @@ function MailtoLink({
       onEmailSent();
       setPolling(false);
     }
-  }, [accountStatus]);
+  }, [accountStatus?.processing]);
 
   const mailtoHref = `mailto:${to}?subject=${subject}&body=${body}`;
+
   const handleEmail = () => {
     window.location.href = mailtoHref;
     setPolling(true);
@@ -90,6 +92,7 @@ function MailtoLink({
   return (
     <motion.button
       onClick={handleEmail}
+      disabled={polling}
       whileHover={{ backgroundColor: "#1D4ED8" }}
       whileTap={{ scale: 0.98 }}
       className="px-4 py-2 cursor-pointer font-bold bg-[#3139FBFF] rounded-lg"
