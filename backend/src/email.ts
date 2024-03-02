@@ -2,6 +2,7 @@ import { google } from "googleapis";
 import * as fs from "fs";
 import { OAuth2Client } from "google-auth-library";
 import readline from "readline";
+import { poseidonCircom, stringToCircomArray } from "./utils/poseidon-circom";
 
 const TOKEN_PATH = "credentials/token.json";
 const CREDENTIALS_PATH = "credentials/credentials.json";
@@ -90,6 +91,7 @@ export async function getEmail(messageId: string): Promise<string> {
   }
 }
 
+export const processingEmails = new Set<string>();
 export async function listenForNewEmails(
   processEmail: (email: string) => Promise<void>,
   interval: number = 3
@@ -122,12 +124,31 @@ export async function listenForNewEmails(
         const rawEmail = await getEmail(emailId);
         if (rawEmail) {
           console.log("Start processing email:", emailId);
+          const re_from =
+            /(?:(?:\r\n)|^)From:(?:[^\r\n]+<)?([A-Za-z0-9!#$%&'\\*\\+-/=\\?^_`{\\|}~\\.]+@[A-Za-z0-9\\.-]+)/gm;
+          const match_from = Array.from(rawEmail.matchAll(re_from))[0];
+          const sender = match_from[1];
+          const circomArray = stringToCircomArray(sender);
+          const emailHash: string = await poseidonCircom(circomArray);
+          processingEmails.add(emailHash);
+          fs.writeFileSync("state.json", JSON.stringify([...processingEmails]));
           processEmail(rawEmail)
             .then(() => {
-              console.log("Finished processing email:", emailId);
+              console.log(
+                `Finished processing email from ${sender}, ${emailId}`
+              );
             })
             .catch((error) => {
-              console.log("Error processing email:", emailId, error);
+              console.log(
+                `Finished processing email from ${sender}, ${emailId}, ${error}`
+              );
+            })
+            .finally(() => {
+              processingEmails.delete(emailHash);
+              fs.writeFileSync(
+                "state.json",
+                JSON.stringify([...processingEmails])
+              );
             });
         }
       }

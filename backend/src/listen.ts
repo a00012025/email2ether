@@ -1,5 +1,5 @@
 import { generateInputs } from "./gen-input";
-import { getOneEmail, initEmailAuth, listenForNewEmails } from "./email";
+import { initEmailAuth, listenForNewEmails } from "./email";
 import { generateProof } from "./gen-proof";
 import {
   createEmailAccount,
