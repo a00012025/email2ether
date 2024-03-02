@@ -180,15 +180,19 @@ export default function HomePage() {
   };
 
   return (
-    <div className="p-6 mb-96">
-      <motion.div id="section-1" className="section">
+    <motion.div>
+      <motion.div
+        id="section-1"
+        className="section"
+        style={{ justifyContent: "start", marginTop: "98px" }}
+      >
         <div className="flex mb-4 rounded-2xl  my-a p-2 bg-[#1D4ED8] mt-20">
           <Image src={logo} alt="logo" width={100} height={100} />
         </div>
         <div className="flex p-6">
           <BigText>Get your Smart Wallet With Email in Seconds</BigText>
         </div>
-        <motion.div className="flex flex-1 justify-center" animate={controls}>
+        <motion.div className="flex justify-center" animate={controls}>
           <form
             style={{
               width: "500px",
@@ -334,6 +338,6 @@ export default function HomePage() {
         </motion.div>
       </motion.div>{" "}
       {/* END SECTION 4*/}
-    </div>
+    </motion.div>
   );
 }
