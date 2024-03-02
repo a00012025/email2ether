@@ -3,11 +3,10 @@ import { usePersistentStore } from "@/store/persistent";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Lottie from "react-lottie";
 import { Address } from "viem";
-import SendEmailIcon from "../../../public/sendEmailIcon.svg";
+import SendEmailIcon from "../../public/sendEmailIcon.svg";
 
 const cubeOptions = {
   loop: true,
@@ -52,6 +51,12 @@ function MailtoLink({
   const getHashedEmail = usePersistentStore((state) => state.getHashedEmail);
   const hashedEmail = getHashedEmail();
   const [polling, setPolling] = useState(false);
+  const [buttonTitle, setButtonTitle] = useState("Open Mail Client");
+  const to = "email2ether.denver@gmail.com";
+  const subject = encodeURIComponent(`Change owner to ${changeAddress}`);
+  const body = encodeURIComponent(
+    "Please send this email from the email address you used to generate your wallet. Don't modify the to or subject and we'll take care of the rest!"
+  );
 
   const {
     data: accountStatus,
@@ -64,22 +69,12 @@ function MailtoLink({
     enabled: polling,
   });
 
-  console.log("accountStatus", accountStatus);
-
   useEffect(() => {
     if (accountStatus?.processing === true) {
       onEmailSent();
       setPolling(false);
     }
   }, [accountStatus]);
-
-  const [buttonTitle, setButtonTitle] = useState("Open Mail Client");
-  const router = useRouter();
-  const to = "email2ether.denver@gmail.com";
-  const subject = encodeURIComponent(`Change owner to ${changeAddress}`);
-  const body = encodeURIComponent(
-    "Please send this email from the email address you used to generate your wallet. Don't modify the to or subject and we'll take care of the rest!"
-  );
 
   const mailtoHref = `mailto:${to}?subject=${subject}&body=${body}`;
   const handleEmail = () => {

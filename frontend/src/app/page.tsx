@@ -3,6 +3,7 @@ import SparklesIcon from "@/../public/sparkles.svg";
 import WalletIcon from "@/../public/walletIcon.svg";
 import BigText from "@/components/BigText";
 import MailtoLink from "@/components/MailToLink";
+import ProgressBar from "@/components/ProgressBar";
 import EmailAccountFactoryAbi from "@/constants/EmailAccountFactoryAbi";
 import dotAnimation from "@/constants/dots.json";
 import downArrowAnimation from "@/constants/downArrow.json";
@@ -294,13 +295,19 @@ export default function HomePage() {
         </motion.div>
       </motion.div>
       <motion.div id="section-3" className="flex justify-center flex-col">
-        {loadingChangeOwner && (
-          <Lottie options={loadingBlockchainOptions} height={400} width={400} />
-        )}
-        <div>
-          change owner pending: {loadingChangeOwner ? "pending" : "done"}
-        </div>
-        <div>user verified {userVerified ? "verifed" : "not verified"}</div>
+        <motion.div className="px-12 tm-2 relative">
+          <BigText>Connecting You to Your Wallet</BigText>
+          {!loadingChangeOwner && (
+            <Lottie
+              options={loadingBlockchainOptions}
+              height={400}
+              width={400}
+            />
+          )}
+          <motion.div style={{ bottom: 20 }} className="flex flex-1 mx-56">
+            <ProgressBar />
+          </motion.div>
+        </motion.div>
       </motion.div>
       <motion.div id="section-4" className="flex flex-col">
         <BigText>That was Awesome!</BigText>
@@ -311,9 +318,9 @@ export default function HomePage() {
           (Don't worry, we'll pay all the fees!)
         </p>
         <Lottie options={profileOptions} height={200} width={200} />
-        <motion.div className="">
-          <p className="text-gray-800 mt-1 font-bold bg-slate-400 ">
-            0x6123453452462345basfd234324
+        <motion.div className="text-center">
+          <p className="text-gray-800 m-0 font-bold bg-slate-400 ">
+            {userContractAddress}
           </p>
           <p className="text-blue-500 mt-1">{0} ETH</p>
         </motion.div>
