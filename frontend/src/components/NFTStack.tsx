@@ -5,7 +5,7 @@ import {
   signUserOps,
 } from "@/lib/userOps";
 import { usePersistentStore } from "@/store/persistent";
-import { motion, useAnimation } from "framer-motion";
+import { motion } from "framer-motion";
 import move from "lodash-move";
 import LottiePlayer from "lottie-react";
 import Image from "next/image";
@@ -81,13 +81,27 @@ interface NFTStack {
 const NFTStack = ({ selectedNftIndex }: NFTStack) => {
   const [cards, setCards] = useState(CARDS);
   const [minting, setMinting] = useState<number | null>(null);
-  const controls = useAnimation();
   const [txHash, setTxHash] = useState();
   const [mintedNft, setMintedNft] = useState<number | null>(null);
+  const [translateX, setTranslateX] = useState(0);
+  const [hide, setHide] = useState(false);
 
   const [userContractAddress, userSessionAccount] = usePersistentStore(
     (state) => [state.userContractAddress, state.account]
   );
+
+  // function fakeMint(idx) {
+  //   console.log("idx", idx);
+  //   setMinting(idx); // minting 0 index
+
+  //   setTimeout(() => {
+  //     setTranslateX(-400);
+  //   }, 5500);
+  //   setTimeout(() => {
+  //     setMinting(null); // minting 0 index
+  //     setHide(true);
+  //   }, 5000);
+  // }
 
   const {
     mutate: mintNft,
@@ -115,6 +129,7 @@ const NFTStack = ({ selectedNftIndex }: NFTStack) => {
       setTxHash(data.tx_hash);
       setMintedNft(minting);
       setMinting(null);
+      setTranslateX(-400);
     },
   });
 
@@ -164,6 +179,7 @@ const NFTStack = ({ selectedNftIndex }: NFTStack) => {
                 translateX: index === mintedNft ? -400 : 0,
               }}
               animate={{
+                x: index === 0 ? translateX : 0,
                 top: index * -CARD_OFFSET,
                 scale: 1 - index * SCALE_FACTOR,
                 zIndex: CARD_COLORS.length - index,
@@ -210,6 +226,8 @@ const NFTStack = ({ selectedNftIndex }: NFTStack) => {
                     whileTap={{ scale: 0.98 }}
                     className="px-4 py-2 cursor-pointer font-bold bg-[#3139FBFF] rounded-lg"
                     style={{
+                      display: mintedNft === nft.idx ? "none" : "block",
+                      zIndex: index === 0 ? 1000 : 0,
                       border: "none",
                       right: 12,
                       top: 10,
@@ -218,8 +236,9 @@ const NFTStack = ({ selectedNftIndex }: NFTStack) => {
                       backgroundColor: "#2563eb",
                     }}
                     onClick={() => handleClick(nft.idx)}
+                    // onClick={() => fakeMint(nft.idx)}
                   >
-                    {minting === nft.idx && (
+                    {minting === 0 && (
                       <>
                         <LottiePlayer
                           animationData={mintAnimation}

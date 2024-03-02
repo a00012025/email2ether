@@ -21,7 +21,7 @@ import { getHashedEmail, usePersistentStore } from "@/store/persistent";
 import { AnimatePresence, motion, useAnimation } from "framer-motion";
 import LottiePlayer from "lottie-react";
 import Image from "next/image";
-import { Ref, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import Lottie from "react-lottie";
 
@@ -96,13 +96,13 @@ const sendOptions = {
 const EMAIL_FACTORY_ADDRESS = "0x2ECC385Af1fb4C7b2f37ad0295e603ed619B7C70";
 export default function HomePage() {
   const [nftIndex, setNftIndex] = useState(0);
-  const section1 = useRef<Ref<HTMLDivElement>>(null);
-  const section2 = useRef<Ref<HTMLDivElement>>(null);
-  const section3 = useRef<Ref<HTMLDivElement>>(null);
-  const section4 = useRef<Ref<HTMLDivElement>>(null);
-  const section5 = useRef<Ref<HTMLDivElement>>(null);
+  const section1 = useRef<HTMLDivElement>();
+  const section2 = useRef<HTMLDivElement>();
+  const section3 = useRef<HTMLDivElement>();
+  const section4 = useRef<HTMLDivElement>();
+  const section5 = useRef<HTMLDivElement>();
 
-  const downArrowRefSection2 = useRef(null);
+  const downArrowRefSection2 = useRef<Lottie>();
 
   const userVerifiedOwner = usePersistentStore(
     (state) => state.userVerifiedOwner
@@ -196,7 +196,7 @@ export default function HomePage() {
               section2.current?.scrollIntoView({ behavior: "smooth" });
             }, 7000);
             setTimeout(() => {
-              downArrowRefSection2.current?.play();
+              (downArrowRefSection2 as any).current?.play();
             }, 8000);
 
             // trigger animation here
@@ -219,7 +219,7 @@ export default function HomePage() {
     <motion.div>
       <motion.div
         id="section-1"
-        ref={section1}
+        ref={section1 as any}
         className="section"
         style={{
           justifyContent: "start",
@@ -316,7 +316,7 @@ export default function HomePage() {
         )}
       </motion.div>
       <motion.div
-        ref={section5}
+        ref={section5 as any}
         id="section-5"
         className="section"
         style={{ justifyContent: "center", paddingBottom: "300px" }}
@@ -351,7 +351,7 @@ export default function HomePage() {
       </motion.div>
       <motion.div
         id="section-2"
-        ref={section2}
+        ref={section2 as any}
         initial="visible"
         variants={sectionVariants}
         className="section"
@@ -384,7 +384,7 @@ export default function HomePage() {
               <motion.div className="mt-8 mb-8" key="sec2-3">
                 <LottiePlayer
                   key="downArrowSec2"
-                  lottieRef={downArrowRefSection2}
+                  lottieRef={downArrowRefSection2 as any}
                   loop={false}
                   autoplay={false}
                   animationData={downArrowAnimation}
@@ -400,13 +400,13 @@ export default function HomePage() {
               {!emailRecieved && account && account.address && (
                 <MailtoLink
                   onClicked={() => {
-                    pinkEmailRef.current?.play();
-                    downArrowRefSection2.current?.destroy();
+                    (pinkEmailRef as any).current?.play();
+                    (downArrowRefSection2 as any).current?.destroy();
                   }}
                   changeAddress={account.address}
                   onEmailSent={() => {
                     changeOwner();
-                    pinkEmailRef.current?.stop();
+                    (pinkEmailRef as any).current?.stop();
                     setTimeout(() => {
                       section3.current?.scrollIntoView({ behavior: "smooth" });
                     }, 3000);
@@ -417,7 +417,7 @@ export default function HomePage() {
           </>
         )}
       </motion.div>
-      <motion.div ref={section3} id="section-3" className="section">
+      <motion.div ref={section3 as any} id="section-3" className="section">
         <motion.div className="flex items-center flex-col px-12 tm-2 relative">
           <AnimatePresence>
             {loadingChangeOwner && !userVerifiedOwner && (
@@ -452,7 +452,7 @@ export default function HomePage() {
           </AnimatePresence>
         </motion.div>
       </motion.div>
-      <motion.div ref={section4} id="section-4" className="section">
+      <motion.div ref={section4 as any} id="section-4" className="section">
         {userVerifiedOwner && (
           <>
             <motion.div>
