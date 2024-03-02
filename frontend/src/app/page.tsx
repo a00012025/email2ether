@@ -67,26 +67,6 @@ const profileOptions = {
   },
 };
 
-const loadingBlockchainOptions = {
-  loop: true,
-  autoplay: true,
-  animationData: loadingBlockchainAnimation,
-
-  rendererSettings: {
-    preserveAspectRatio: "xMidYMid slice",
-  },
-};
-
-const downArrowOptions = {
-  loop: false,
-  autoplay: true,
-  animationData: downArrowAnimation,
-
-  rendererSettings: {
-    preserveAspectRatio: "xMidYMid slice",
-  },
-};
-
 const cubeOptions = {
   loop: true,
   autoplay: true,
@@ -115,6 +95,8 @@ export default function HomePage() {
   const section4 = useRef<Ref<HTMLDivElement>>(null);
   const section5 = useRef<Ref<HTMLDivElement>>(null);
 
+  const downArrowRefSection2 = useRef(null);
+
   const userVerifiedOwner = usePersistentStore(
     (state) => state.userVerifiedOwner
   );
@@ -127,7 +109,9 @@ export default function HomePage() {
   const controls = useAnimation();
   const { loading: loadingChangeOwner, changeOwner } = useChangeOwner({
     onOwnerChanged: () => {
-      section4.current?.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        section4.current?.scrollIntoView({ behavior: "smooth" });
+      }, 3000);
     },
   });
   const [showSection1Arrow, setShowSection1Arrow] = useState(false);
@@ -204,6 +188,9 @@ export default function HomePage() {
             setTimeout(() => {
               section2.current?.scrollIntoView({ behavior: "smooth" });
             }, 7000);
+            setTimeout(() => {
+              downArrowRefSection2.current?.play();
+            }, 8000);
 
             // trigger animation here
           }, 3000);
@@ -306,7 +293,8 @@ export default function HomePage() {
         </motion.div>
         {showSection1Arrow && (
           <LottiePlayer
-            ref={section1Arrow}
+            key="downArrowSec1"
+            lottieRef={section1Arrow}
             animationData={downArrowAnimation}
             loop={false}
             autoplay={true}
@@ -315,7 +303,7 @@ export default function HomePage() {
               width: "300px",
               height: "300px",
               position: "absolute",
-              bottom: "58px",
+              bottom: "140px",
             }}
           />
         )}
@@ -364,14 +352,6 @@ export default function HomePage() {
       >
         {userHashedEmail && (
           <>
-            <motion.div className="mt-8 mb-8">
-              <LottiePlayer
-                loop={false}
-                animationData={downArrowAnimation}
-                style={{ width: "200px", height: "200px" }}
-              />
-            </motion.div>
-
             <motion.div className="px-12 tm-2">
               <BigText>Let's Claim it by Sending an Email!</BigText>
             </motion.div>
@@ -382,7 +362,7 @@ export default function HomePage() {
             </div>
             <AnimatePresence>
               {emailRecieved ? (
-                <motion.div className="flex justify-center">
+                <motion.div className="flex justify-center" key="sec2-1">
                   <LottiePlayer
                     animationData={greenSuccessAnimation}
                     autoplay={true}
@@ -391,7 +371,7 @@ export default function HomePage() {
                   />
                 </motion.div>
               ) : (
-                <motion.div className="flex justify-center">
+                <motion.div className="flex justify-center" key="sec2-2">
                   <LottiePlayer
                     animationData={pinkEmailAnimation}
                     autoplay={false}
@@ -400,6 +380,17 @@ export default function HomePage() {
                   />
                 </motion.div>
               )}
+              <motion.div className="mt-8 mb-8" key="sec2-3">
+                <LottiePlayer
+                  key="downArrowSec2"
+                  lottieRef={downArrowRefSection2}
+                  loop={false}
+                  autoplay={false}
+                  animationData={downArrowAnimation}
+                  initialSegment={[5, 60]}
+                  style={{ width: "200px", height: "200px" }}
+                />
+              </motion.div>
             </AnimatePresence>
             <motion.div
               className="flex justify-center mt-3"
@@ -409,6 +400,7 @@ export default function HomePage() {
                 <MailtoLink
                   onClicked={() => {
                     pinkEmailRef.current?.play();
+                    downArrowRefSection2.current?.destroy();
                   }}
                   changeAddress={account.address}
                   onEmailSent={() => {
@@ -425,19 +417,35 @@ export default function HomePage() {
         )}
       </motion.div>
       <motion.div ref={section3} id="section-3" className="section">
-        <motion.div className="px-12 tm-2 relative">
-          {loadingChangeOwner && (
-            <>
-              <BigText>Connecting You to Your Wallet</BigText>
-              <LottiePlayer
-                animationData={loadingBlockchainAnimation}
-                autoplay={true}
-              />
-              <motion.div style={{ bottom: 20 }} className="flex flex-1 mx-56">
-                <ProgressBar />
+        <motion.div className="flex items-center flex-col px-12 tm-2 relative">
+          <AnimatePresence>
+            {loadingChangeOwner && !userVerifiedOwner && (
+              <motion.div key="sec3-1">
+                <BigText>Connecting You to Your Wallet</BigText>
+                <LottiePlayer
+                  animationData={loadingBlockchainAnimation}
+                  autoplay={true}
+                />
+                <motion.div
+                  style={{ bottom: 20 }}
+                  className="flex flex-1 mx-56"
+                >
+                  <ProgressBar />
+                </motion.div>
               </motion.div>
-            </>
-          )}
+            )}
+            {!loadingChangeOwner && userVerifiedOwner && (
+              <motion.div key="sec3-2">
+                <BigText>Yay! You're Connected!</BigText>
+                <LottiePlayer
+                  animationData={greenSuccessAnimation}
+                  autoplay={true}
+                  loop={false}
+                  style={{ height: "400px", width: "500px" }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </motion.div>
       <motion.div

@@ -1,7 +1,7 @@
 import dotAnimation from "@/constants/dots.json";
 import { usePersistentStore } from "@/store/persistent";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Lottie from "react-lottie";
@@ -63,6 +63,8 @@ function MailtoLink({
     "Please send this email from the email address you used to generate your wallet. Don't modify the to or subject and we'll take care of the rest!"
   );
 
+  const control = useAnimation();
+
   const {
     data: accountStatus,
     isLoading,
@@ -92,10 +94,18 @@ function MailtoLink({
     setPolling(true);
     onClicked();
     setButtonTitle("Waiting for email");
+    control.start({
+      y: -500, // Adjust as needed for sliding distance
+      scale: 0,
+      opacity: 0,
+      transition: { duration: 0.5 }, // Adjust timing as needed
+    });
   };
 
   return (
     <motion.button
+      initial={{ scale: 1, opacity: 1 }}
+      animate={control}
       onClick={handleEmail}
       disabled={polling}
       whileHover={{ backgroundColor: "#1D4ED8" }}

@@ -8,7 +8,7 @@ const ProgressBar = () => {
     controls.start({
       width: "100%",
       backgroundColor: ["#ff0000", "#ffff00", "#008000"],
-      transition: { duration: 30, ease: "linear" },
+      transition: { duration: 45, ease: "linear" },
     });
   }, [controls]);
 
