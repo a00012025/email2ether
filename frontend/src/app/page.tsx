@@ -1,8 +1,10 @@
 "use client";
+import logo from "@/../public/logo.png";
 import SparklesIcon from "@/../public/sparkles.svg";
 import WalletIcon from "@/../public/walletIcon.svg";
 import BigText from "@/components/BigText";
 import MailtoLink from "@/components/MailToLink";
+import NFTStack from "@/components/NFTStack";
 import ProgressBar from "@/components/ProgressBar";
 import EmailAccountFactoryAbi from "@/constants/EmailAccountFactoryAbi";
 import dotAnimation from "@/constants/dots.json";
@@ -179,7 +181,10 @@ export default function HomePage() {
 
   return (
     <div className="p-6 mb-96">
-      <motion.div id="section-1">
+      <motion.div id="section-1" className="section">
+        <div className="flex mb-4 rounded-2xl  my-a p-2 bg-[#1D4ED8] mt-20">
+          <Image src={logo} alt="logo" width={100} height={100} />
+        </div>
         <div className="flex p-6">
           <BigText>Get your Smart Wallet With Email in Seconds</BigText>
         </div>
@@ -251,7 +256,7 @@ export default function HomePage() {
         initial="visible"
         // animate={userContractAddress && !loading ? "visible" : "hidden"}
         variants={sectionVariants}
-        className="flex flex-col justify-center items-center "
+        className="section"
       >
         <motion.div className="px-12 mb-6">
           <BigText>Your Unique Address</BigText>
@@ -294,7 +299,7 @@ export default function HomePage() {
           )}
         </motion.div>
       </motion.div>
-      <motion.div id="section-3" className="flex justify-center flex-col">
+      <motion.div id="section-3" className="section">
         <motion.div className="px-12 tm-2 relative">
           <BigText>Connecting You to Your Wallet</BigText>
           {!loadingChangeOwner && (
@@ -309,7 +314,7 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
       </motion.div>
-      <motion.div id="section-4" className="flex flex-col">
+      <motion.div id="section-4" className="section">
         <BigText>That was Awesome!</BigText>
         <p className="text-center px-32 m-0">
           Try out your new wallet by minting a free NFT below
@@ -324,7 +329,11 @@ export default function HomePage() {
           </p>
           <p className="text-blue-500 mt-1">{0} ETH</p>
         </motion.div>
-      </motion.div>
+        <motion.div className="flex justify-center">
+          <NFTStack />
+        </motion.div>
+      </motion.div>{" "}
+      {/* END SECTION 4*/}
     </div>
   );
 }
