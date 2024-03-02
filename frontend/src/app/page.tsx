@@ -359,7 +359,7 @@ export default function HomePage() {
         {userHashedEmail && (
           <>
             <motion.div className="px-12 tm-2" style={{ translateY: 30 }}>
-              <BigText>Let's Claim it by Sending an Email!</BigText>
+              <BigText>Let&apos;s Claim it by Sending an Email!</BigText>
             </motion.div>
             <AnimatePresence>
               {emailRecieved ? (
@@ -440,7 +440,7 @@ export default function HomePage() {
             )}
             {!loadingChangeOwner && userVerifiedOwner && (
               <motion.div className="flex flex-col items-center" key="sec3-2">
-                <BigText>Yay! You're Connected!</BigText>
+                <BigText>Yay! You&apos;re Connected!</BigText>
                 <LottiePlayer
                   animationData={greenSuccessAnimation}
                   autoplay={true}
@@ -461,7 +461,7 @@ export default function HomePage() {
                 Try out your new wallet by minting a free NFT below
               </p>
               <p className="text-center text-sm px-32 m-0">
-                (Don't worry, we'll pay all the fees!)
+                Don&apos;t worry, we&apos;ll pay all the fees!
               </p>
             </motion.div>
 
