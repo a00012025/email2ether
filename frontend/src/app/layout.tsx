@@ -19,10 +19,7 @@ export default function RootLayout({
           <div
             style={{
               width: 800,
-              //minHeight: 300,
-              //backgroundColor: "rgba(255, 255, 255, 0.8)",
             }}
-            // className=" rounded-xl p-6 shadow-lg"
           >
             <QueryClientProvider client={queryClient}>
               {children}

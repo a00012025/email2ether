@@ -20,7 +20,6 @@ import { getHashedEmail, usePersistentStore } from "@/store/persistent";
 import { motion, useAnimation } from "framer-motion";
 import LottiePlayer from "lottie-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { Ref, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import Lottie from "react-lottie";
@@ -107,7 +106,7 @@ const sendOptions = {
   },
 };
 
-const EMAIL_FACTORY_ADDRESS = "0x763c0B996E6C931e828974b87Dcf455c0F3D49e7";
+const EMAIL_FACTORY_ADDRESS = "0x2ECC385Af1fb4C7b2f37ad0295e603ed619B7C70";
 export default function HomePage() {
   const section1 = useRef<Ref<HTMLDivElement>>(null);
   const section2 = useRef<Ref<HTMLDivElement>>(null);
@@ -115,18 +114,22 @@ export default function HomePage() {
   const section4 = useRef<Ref<HTMLDivElement>>(null);
   const section5 = useRef<Ref<HTMLDivElement>>(null);
 
+  const userVerifiedOwner = usePersistentStore(
+    (state) => state.userVerifiedOwner
+  );
+
+  const pinkEmailRef = useRef(null);
+
   const [loading, setLoading] = useState(false);
   const controls = useAnimation();
   const { loading: loadingChangeOwner, changeOwner } = useChangeOwner(() => {
     section4.current?.scrollIntoView({ behavior: "smooth" });
   });
-  const userVerified = usePersistentStore((state) => state.userVerifiedOwner);
   const [showSection1Arrow, setShowSection1Arrow] = useState(false);
 
   // setup the account
   const setupAccount = usePersistentStore((state) => state.setupNewAccount);
   const reset = usePersistentStore((state) => state.reset);
-  const router = useRouter();
 
   const account = usePersistentStore((state) => state.account);
   const email = usePersistentStore((state) => state.email);
@@ -145,6 +148,7 @@ export default function HomePage() {
   const { register, handleSubmit } = useForm<FormData>();
   const registerEmail = usePersistentStore((state) => state.setEmail);
   const setHashedEmail = usePersistentStore((state) => state.setHashedEmail);
+  const userHashedEmail = usePersistentStore((state) => state.hashedEmail);
 
   // Lottie Refs
   const section1Arrow = useRef(null);
@@ -192,6 +196,10 @@ export default function HomePage() {
               section5.current?.scrollIntoView({ behavior: "smooth" });
             }, 2000);
 
+            setTimeout(() => {
+              section2.current?.scrollIntoView({ behavior: "smooth" });
+            }, 7000);
+
             // trigger animation here
           }, 3000);
         });
@@ -226,7 +234,11 @@ export default function HomePage() {
         <div className="flex p-6">
           <BigText>Get your Smart Wallet With Email in Seconds</BigText>
         </div>
-        <motion.div className="flex justify-center" animate={controls}>
+        <motion.div
+          style={{ marginTop: "12px" }}
+          className="flex justify-center"
+          animate={controls}
+        >
           <form
             style={{
               width: "500px",
@@ -309,21 +321,33 @@ export default function HomePage() {
         className="section"
         style={{ justifyContent: "center", paddingBottom: "300px" }}
       >
-        <Lottie options={ethWalletOptions} height={300} width={300} />
-        <motion.div className="px-12 mb-6">
-          <BigText>Your Unique Address</BigText>
-        </motion.div>
-        <motion.div
-          style={{ width: "676px", height: "32px", position: "relative" }}
-          className="bg-gray-100 justify-center items-center text-2xl font-bold p-4 rounded-lg shadow-lg text-center font-mono flex-row"
-        >
-          <div style={{ position: "absolute", left: 20, top: 8 }}>
-            <Image src={WalletIcon} alt="wallet icon" width={40} height={40} />
-          </div>
-          <div style={{ marginLeft: "60px" }} className="flex">
-            {userContractAddress}
-          </div>
-        </motion.div>
+        {userHashedEmail && (
+          <>
+            <LottiePlayer
+              animationData={ethWalletAnimation}
+              style={{ width: "300px", height: "300px" }}
+            />
+            <motion.div className="px-12 mb-6">
+              <BigText>Your Unique Address</BigText>
+            </motion.div>
+            <motion.div
+              style={{ width: "676px", height: "32px", position: "relative" }}
+              className="bg-gray-100 justify-center items-center text-2xl font-bold p-4 rounded-lg shadow-lg text-center font-mono flex-row"
+            >
+              <div style={{ position: "absolute", left: 20, top: 8 }}>
+                <Image
+                  src={WalletIcon}
+                  alt="wallet icon"
+                  width={40}
+                  height={40}
+                />
+              </div>
+              <div style={{ marginLeft: "60px" }} className="flex">
+                {userContractAddress}
+              </div>
+            </motion.div>
+          </>
+        )}
       </motion.div>
       <motion.div
         id="section-2"
@@ -350,7 +374,12 @@ export default function HomePage() {
           </p>
         </div>
         <motion.div className="flex justify-center">
-          <Lottie options={pinkEmail} height={250} width={400} />
+          <LottiePlayer
+            animationData={pinkEmailAnimation}
+            autoplay={false}
+            lottieRef={pinkEmailRef}
+            style={{ height: "400px", width: "500px" }}
+          />
         </motion.div>
         <motion.div
           className="flex justify-center mt-3"
@@ -358,6 +387,9 @@ export default function HomePage() {
         >
           {account && account.address && (
             <MailtoLink
+              onClicked={() => {
+                pinkEmailRef.current?.play();
+              }}
               changeAddress={account.address}
               onEmailSent={() => {
                 changeOwner();
@@ -369,17 +401,18 @@ export default function HomePage() {
       </motion.div>
       <motion.div ref={section3} id="section-3" className="section">
         <motion.div className="px-12 tm-2 relative">
-          <BigText>Connecting You to Your Wallet</BigText>
-          {!loadingChangeOwner && (
-            <Lottie
-              options={loadingBlockchainOptions}
-              height={400}
-              width={400}
-            />
+          {loadingChangeOwner && (
+            <>
+              <BigText>Connecting You to Your Wallet</BigText>
+              <LottiePlayer
+                animationData={loadingBlockchainAnimation}
+                autoplay={true}
+              />
+              <motion.div style={{ bottom: 20 }} className="flex flex-1 mx-56">
+                <ProgressBar />
+              </motion.div>
+            </>
           )}
-          <motion.div style={{ bottom: 20 }} className="flex flex-1 mx-56">
-            <ProgressBar />
-          </motion.div>
         </motion.div>
       </motion.div>
       <motion.div
@@ -388,23 +421,27 @@ export default function HomePage() {
         className="section justify-start"
         style={{ marginBottom: "48px", justifyContent: "start" }}
       >
-        <BigText>That was Awesome!</BigText>
-        <p className="text-center px-32 m-0 pt-6">
-          Try out your new wallet by minting a free NFT below
-        </p>
-        <p className="text-center text-sm px-32 m-0">
-          (Don't worry, we'll pay all the fees!)
-        </p>
-        <motion.div className="flex justify-center  flex-col mb-10">
-          <Lottie options={profileOptions} height={200} width={200} />
-          <motion.div className="text-center">
-            <p className="text-gray-800 m-0 font-bold shadow rounded-2xl p-3 ">
-              {userContractAddress} sadfsdf
+        {userVerifiedOwner && (
+          <>
+            <BigText>That was Awesome!</BigText>
+            <p className="text-center px-32 m-0 pt-6">
+              Try out your new wallet by minting a free NFT below
             </p>
-          </motion.div>
-        </motion.div>
+            <p className="text-center text-sm px-32 m-0">
+              (Don't worry, we'll pay all the fees!)
+            </p>
+            <motion.div className="flex justify-center  flex-col mb-10">
+              <Lottie options={profileOptions} height={200} width={200} />
+              <motion.div className="text-center">
+                <p className="text-gray-800 m-0 font-bold shadow rounded-2xl p-3 ">
+                  {userContractAddress} sadfsdf
+                </p>
+              </motion.div>
+            </motion.div>
 
-        <NFTStack />
+            <NFTStack />
+          </>
+        )}
       </motion.div>{" "}
       {/* END SECTION 4*/}
     </motion.div>

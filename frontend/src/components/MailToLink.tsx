@@ -44,9 +44,11 @@ const fetchAccountStatus = async (
 function MailtoLink({
   changeAddress,
   onEmailSent,
+  onClicked,
 }: {
   changeAddress: Address;
   onEmailSent: () => void;
+  onClicked: () => void;
 }) {
   const getHashedEmail = usePersistentStore((state) => state.getHashedEmail);
   const hashedEmail = getHashedEmail();
@@ -81,7 +83,9 @@ function MailtoLink({
 
   const handleEmail = () => {
     window.location.href = mailtoHref;
+
     setPolling(true);
+    onClicked();
     setButtonTitle("Waiting for email");
 
     setTimeout(() => {
